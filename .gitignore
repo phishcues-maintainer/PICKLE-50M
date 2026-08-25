@@ -3,10 +3,13 @@
 !/artifacts/pickle-50m-mixed-attn.pklm
 !/artifacts/pickle-50m-balanced-refined.pklm
 !/artifacts/pickle-50m-native.bin
+!/artifacts/pickle-31m-sable-q3.pklm
+!/artifacts/pickle-31m-sable-q3.pkn
 /data/
 /stentor_tokenmonster_runtime/
 /pickle50-eval-balanced.tar
 /results/cloud/
 /results/cloud-final/
+/results/supra-tokenizer-validation.json
 __pycache__/
 *.pidx

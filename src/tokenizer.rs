@@ -2,11 +2,13 @@
 //! the native model. The ungreedy branch scoring follows TokenMonster's MIT
 //! licensed Go implementation.
 
+use std::collections::HashMap;
 use std::io;
 
 use unicode_normalization::UnicodeNormalization;
 
 const TOKENIZER_MAGIC: &[u8; 4] = b"TMC1";
+const BPE_MAGIC: &[u8; 4] = b"BPE1";
 const MISSING_U13: usize = 0x1fff;
 const MISSING_U16: u16 = 0xffff;
 const FLAG_VALUES: [u8; 14] = [1, 3, 4, 5, 16, 17, 128, 131, 132, 133, 136, 140, 152, 165];
@@ -36,7 +38,7 @@ struct Candidate {
     delete: bool,
 }
 
-pub struct Tokenizer {
+pub struct TokenMonsterTokenizer {
     capcode: u8,
     charset: u8,
     normalization: u8,
@@ -164,7 +166,7 @@ fn max_zero(value: i32) -> i32 {
     value.max(0)
 }
 
-impl Tokenizer {
+impl TokenMonsterTokenizer {
     pub fn load(data: &[u8], expected_vocab: usize) -> io::Result<Self> {
         if data.len() < 18 || data.get(..4) != Some(TOKENIZER_MAGIC) {
             return Err(invalid("truncated TokenMonster vocabulary header"));
@@ -584,6 +586,285 @@ impl Tokenizer {
             raw
         };
         String::from_utf8_lossy(&decoded).into_owned()
+    }
+}
+
+pub struct ByteBpeTokenizer {
+    byte_ids: [u16; 256],
+    reverse: Vec<Vec<u8>>,
+    merges: HashMap<(u16, u16), (u32, u16)>,
+    specials: Vec<(Vec<u8>, u16)>,
+}
+
+impl ByteBpeTokenizer {
+    fn load(data: &[u8], expected_vocab: usize) -> io::Result<Self> {
+        if data.len() < 14 || data.get(..4) != Some(BPE_MAGIC) {
+            return Err(invalid("truncated byte-level BPE header"));
+        }
+        let mut cursor = 4;
+        let vocab_size = read_u32_bpe(data, &mut cursor)? as usize;
+        let merge_count = read_u32_bpe(data, &mut cursor)? as usize;
+        let special_count = read_u16(data, &mut cursor)? as usize;
+        if vocab_size != expected_vocab || vocab_size > u16::MAX as usize {
+            return Err(invalid("byte-level BPE dimensions do not match model"));
+        }
+        let mut byte_ids = [0_u16; 256];
+        for value in &mut byte_ids {
+            *value = read_u16(data, &mut cursor)?;
+            if *value as usize >= vocab_size {
+                return Err(invalid("byte-level BPE byte ID is outside vocabulary"));
+            }
+        }
+        let mut reverse = Vec::with_capacity(vocab_size);
+        for _ in 0..vocab_size {
+            let length = read_u16(data, &mut cursor)? as usize;
+            let end = cursor
+                .checked_add(length)
+                .ok_or_else(|| invalid("byte-level BPE token length overflow"))?;
+            reverse.push(
+                data.get(cursor..end)
+                    .ok_or_else(|| invalid("truncated byte-level BPE token"))?
+                    .to_vec(),
+            );
+            cursor = end;
+        }
+        let mut merges = HashMap::with_capacity(merge_count);
+        for rank in 0..merge_count {
+            let left = read_u16(data, &mut cursor)?;
+            let right = read_u16(data, &mut cursor)?;
+            let merged = read_u16(data, &mut cursor)?;
+            if [left, right, merged]
+                .into_iter()
+                .any(|value| value as usize >= vocab_size)
+                || merges
+                    .insert((left, right), (rank as u32, merged))
+                    .is_some()
+            {
+                return Err(invalid("invalid or duplicate byte-level BPE merge"));
+            }
+        }
+        let mut specials = Vec::with_capacity(special_count);
+        for _ in 0..special_count {
+            let token_id = read_u16(data, &mut cursor)?;
+            let length = read_u16(data, &mut cursor)? as usize;
+            let end = cursor
+                .checked_add(length)
+                .ok_or_else(|| invalid("byte-level BPE special-token length overflow"))?;
+            let raw = data
+                .get(cursor..end)
+                .ok_or_else(|| invalid("truncated byte-level BPE special token"))?
+                .to_vec();
+            if raw.is_empty() || token_id as usize >= vocab_size {
+                return Err(invalid("invalid byte-level BPE special token"));
+            }
+            specials.push((raw, token_id));
+            cursor = end;
+        }
+        if cursor != data.len() {
+            return Err(invalid("trailing bytes in byte-level BPE tokenizer"));
+        }
+        // Longest first gives deterministic matching if special strings overlap.
+        specials.sort_by(|left, right| right.0.len().cmp(&left.0.len()));
+        Ok(Self {
+            byte_ids,
+            reverse,
+            merges,
+            specials,
+        })
+    }
+
+    fn bpe_piece(&self, piece: &str, output: &mut Vec<u32>) {
+        let mut tokens: Vec<u16> = piece
+            .as_bytes()
+            .iter()
+            .map(|byte| self.byte_ids[*byte as usize])
+            .collect();
+        while tokens.len() > 1 {
+            let selected = tokens
+                .windows(2)
+                .enumerate()
+                .filter_map(|(index, pair)| {
+                    self.merges
+                        .get(&(pair[0], pair[1]))
+                        .map(|&(rank, merged)| (rank, index, merged))
+                })
+                .min_by_key(|&(rank, index, _)| (rank, index));
+            let Some((_, index, merged)) = selected else {
+                break;
+            };
+            tokens[index] = merged;
+            tokens.remove(index + 1);
+        }
+        output.extend(tokens.into_iter().map(u32::from));
+    }
+
+    fn encode_ordinary(&self, text: &str, output: &mut Vec<u32>) {
+        let mut cursor = 0;
+        while cursor < text.len() {
+            let remaining = &text[cursor..];
+            let mut end = cursor;
+
+            // GPT-2 contractions have priority over punctuation.
+            if remaining.starts_with('\'') {
+                let lowercase = remaining.to_ascii_lowercase();
+                if let Some(suffix) = ["'re", "'ve", "'ll", "'s", "'t", "'m", "'d"]
+                    .into_iter()
+                    .find(|suffix| lowercase.starts_with(suffix))
+                {
+                    end = cursor + suffix.len();
+                }
+            }
+
+            if end == cursor {
+                let mut scan = cursor;
+                if text[scan..].starts_with(' ') {
+                    scan += 1;
+                }
+                if let Some(first) = text[scan..].chars().next() {
+                    let class = char_class(first);
+                    if class != 0 {
+                        end = scan + first.len_utf8();
+                        while let Some(ch) = text[end..].chars().next() {
+                            if char_class(ch) != class {
+                                break;
+                            }
+                            end += ch.len_utf8();
+                        }
+                    }
+                }
+            }
+
+            if end == cursor {
+                let first = remaining.chars().next().unwrap();
+                if first.is_whitespace() {
+                    let mut whitespace_end = cursor + first.len_utf8();
+                    let mut starts = vec![cursor, whitespace_end];
+                    while let Some(ch) = text[whitespace_end..].chars().next() {
+                        if !ch.is_whitespace() {
+                            break;
+                        }
+                        whitespace_end += ch.len_utf8();
+                        starts.push(whitespace_end);
+                    }
+                    // `\s+(?!\S)` consumes all trailing whitespace, or all but
+                    // the final character when a non-space follows.
+                    end = if whitespace_end == text.len() || starts.len() == 2 {
+                        whitespace_end
+                    } else {
+                        starts[starts.len() - 2]
+                    };
+                } else {
+                    end = cursor + first.len_utf8();
+                    while let Some(ch) = text[end..].chars().next() {
+                        if ch.is_whitespace() || is_letter(ch) || is_number(ch) {
+                            break;
+                        }
+                        end += ch.len_utf8();
+                    }
+                }
+            }
+
+            self.bpe_piece(&text[cursor..end], output);
+            cursor = end;
+        }
+    }
+
+    fn encode(&self, text: &str) -> Vec<u32> {
+        let raw = text.as_bytes();
+        let mut output = Vec::with_capacity(raw.len() / 3 + 4);
+        let mut cursor = 0;
+        while cursor < raw.len() {
+            let next = self
+                .specials
+                .iter()
+                .filter_map(|(special, token_id)| {
+                    raw[cursor..]
+                        .windows(special.len())
+                        .position(|window| window == special)
+                        .map(|offset| (offset, special.len(), *token_id))
+                })
+                .min_by_key(|&(offset, length, _)| (offset, usize::MAX - length));
+            if let Some((offset, length, token_id)) = next {
+                let start = cursor + offset;
+                self.encode_ordinary(&text[cursor..start], &mut output);
+                output.push(token_id as u32);
+                cursor = start + length;
+            } else {
+                self.encode_ordinary(&text[cursor..], &mut output);
+                break;
+            }
+        }
+        output
+    }
+
+    fn decode(&self, tokens: &[u32]) -> String {
+        let mut raw = Vec::new();
+        for &token in tokens {
+            if let Some(piece) = self.reverse.get(token as usize) {
+                raw.extend_from_slice(piece);
+            }
+        }
+        String::from_utf8_lossy(&raw).into_owned()
+    }
+}
+
+fn read_u32_bpe(data: &[u8], cursor: &mut usize) -> io::Result<u32> {
+    let raw = data
+        .get(*cursor..*cursor + 4)
+        .ok_or_else(|| invalid("truncated byte-level BPE tokenizer"))?;
+    *cursor += 4;
+    Ok(u32::from_le_bytes(raw.try_into().unwrap()))
+}
+
+fn char_class(ch: char) -> u8 {
+    if is_letter(ch) {
+        1
+    } else if is_number(ch) {
+        2
+    } else if !ch.is_whitespace() {
+        3
+    } else {
+        0
+    }
+}
+
+pub enum Tokenizer {
+    TokenMonster(TokenMonsterTokenizer),
+    ByteBpe(ByteBpeTokenizer),
+}
+
+impl Tokenizer {
+    pub fn load(data: &[u8], expected_vocab: usize) -> io::Result<Self> {
+        match data.get(..4) {
+            Some(magic) if magic == TOKENIZER_MAGIC => Ok(Self::TokenMonster(
+                TokenMonsterTokenizer::load(data, expected_vocab)?,
+            )),
+            Some(magic) if magic == BPE_MAGIC => {
+                Ok(Self::ByteBpe(ByteBpeTokenizer::load(data, expected_vocab)?))
+            }
+            _ => Err(invalid("unsupported native tokenizer format")),
+        }
+    }
+
+    pub fn encode(&self, text: &str) -> Vec<u32> {
+        match self {
+            Self::TokenMonster(tokenizer) => tokenizer.encode(text),
+            Self::ByteBpe(tokenizer) => tokenizer.encode(text),
+        }
+    }
+
+    pub fn decode(&self, tokens: &[u32]) -> String {
+        match self {
+            Self::TokenMonster(tokenizer) => tokenizer.decode(tokens),
+            Self::ByteBpe(tokenizer) => tokenizer.decode(tokens),
+        }
+    }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::TokenMonster(_) => "TokenMonster",
+            Self::ByteBpe(_) => "byte-level-bpe",
+        }
     }
 }
 

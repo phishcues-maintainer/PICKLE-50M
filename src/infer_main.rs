@@ -80,7 +80,14 @@ fn input(model: &native::Model, opts: &HashMap<String, String>) -> io::Result<Ve
         Some(value) => value.clone(),
         None => fs::read_to_string(required(opts, "prompt-file")?)?,
     };
-    Ok(model.encode(&text, true))
+    let add_bos = number(opts, "add-bos", usize::from(model.default_add_bos))?;
+    if add_bos > 1 {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "--add-bos must be 0 or 1",
+        ));
+    }
+    Ok(model.encode(&text, add_bos == 1))
 }
 
 fn generated_ids(values: &[u32]) -> String {
@@ -94,8 +101,12 @@ fn generated_ids(values: &[u32]) -> String {
 fn model_info(opts: &HashMap<String, String>) -> io::Result<()> {
     let model = load(opts)?;
     println!(
-        "{{\"format\":\"pickle-native-model-v3\",\"authenticated_sha256\":true,\"authenticated_header_and_body_sha256\":\"{}\",\"model_bytes\":{},\"kernel\":\"{}\",\"worker_threads\":{},\"context\":{},\"vocab_size\":{}}}",
+        "{{\"format\":\"pickle-native-model-v{}\",\"authenticated_sha256\":true,\"authenticated_header_and_body_sha256\":\"{}\",\"native_tokenizer\":\"{}\",\"tied_embeddings\":{},\"default_add_bos\":{},\"model_bytes\":{},\"kernel\":\"{}\",\"worker_threads\":{},\"context\":{},\"vocab_size\":{}}}",
+        model.format_version,
         model.authenticated_sha256(),
+        model.tokenizer_name(),
+        model.tied_embeddings,
+        model.default_add_bos,
         model.bytes(),
         model.kernel_name(),
         rayon::current_num_threads(),

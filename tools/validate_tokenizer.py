@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare native Rust text encoding with the TokenMonster reference."""
+"""Compare native Rust text encoding with its upstream tokenizer reference."""
 
 from __future__ import annotations
 
@@ -11,9 +11,6 @@ import tempfile
 import time
 import unicodedata
 from pathlib import Path
-
-import tokenmonster
-
 
 CASES = [
     "",
@@ -52,30 +49,47 @@ def native_tokens(runtime: Path, model: Path, *, prompt: str | None = None,
     return [int(value) for value in encoded.split(",")] if encoded else []
 
 
-def reference_tokens(vocab: object, prompt: str) -> list[int]:
-    encoded = vocab.tokenize(prompt)
-    return [] if encoded is None else [int(token) for token in encoded]
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runtime", type=Path, required=True)
     parser.add_argument("--model", type=Path, required=True)
-    parser.add_argument("--vocab", type=Path, required=True)
+    reference_group = parser.add_mutually_exclusive_group(required=True)
+    reference_group.add_argument("--vocab", type=Path)
+    reference_group.add_argument("--tokenizer", type=Path)
     parser.add_argument("--tokenmonster-dir", type=Path)
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
 
-    if args.tokenmonster_dir:
-        args.tokenmonster_dir.mkdir(parents=True, exist_ok=True)
-        tokenmonster.set_local_directory(str(args.tokenmonster_dir))
-    reference = tokenmonster.load(str(args.vocab))
+    if args.vocab:
+        import tokenmonster
+
+        if args.tokenmonster_dir:
+            args.tokenmonster_dir.mkdir(parents=True, exist_ok=True)
+            tokenmonster.set_local_directory(str(args.tokenmonster_dir))
+        reference = tokenmonster.load(str(args.vocab))
+
+        def reference_tokens(prompt: str) -> list[int]:
+            encoded = reference.tokenize(prompt)
+            return [] if encoded is None else [int(token) for token in encoded]
+
+        reference_name = "TokenMonster Python package"
+    else:
+        from transformers import AutoTokenizer
+
+        reference = AutoTokenizer.from_pretrained(
+            args.tokenizer, trust_remote_code=False, local_files_only=True
+        )
+
+        def reference_tokens(prompt: str) -> list[int]:
+            return [int(token) for token in reference.encode(prompt, add_special_tokens=False)]
+
+        reference_name = "Transformers fast tokenizer"
 
     failures: list[dict[str, object]] = []
     checked_tokens = 0
     started = time.perf_counter()
     for prompt in CASES:
-        expected = reference_tokens(reference, prompt)
+        expected = reference_tokens(prompt)
         actual = native_tokens(args.runtime, args.model, prompt=prompt)
         checked_tokens += len(expected)
         if actual != expected:
@@ -93,7 +107,7 @@ def main() -> None:
         rng.choice(fragments) + rng.choice([" ", "", "\n"])
         for _ in range(12_000)
     )
-    expected = reference_tokens(reference, large_prompt)
+    expected = reference_tokens(large_prompt)
     with tempfile.TemporaryDirectory(prefix="pickle50-tokenizer-") as temp_dir:
         temp_path = Path(temp_dir)
         prompt_path = Path(temp_dir) / "prompt.txt"
@@ -128,7 +142,7 @@ def main() -> None:
         unicode_prompt = "." + ".".join(unicode_scalars)
         unicode_path = temp_path / "unicode.txt"
         unicode_path.write_text(unicode_prompt, encoding="utf-8", newline="")
-        expected = reference_tokens(reference, unicode_prompt)
+        expected = reference_tokens(unicode_prompt)
         actual = native_tokens(args.runtime, args.model, prompt_file=unicode_path)
         checked_tokens += len(expected)
         if actual != expected:
@@ -151,7 +165,7 @@ def main() -> None:
 
     result = {
         "format": "pickle-native-tokenizer-validation-v1",
-        "reference": "TokenMonster Python package",
+        "reference": reference_name,
         "fixed_cases": len(CASES),
         "generated_corpus_characters": len(large_prompt),
         "unicode_scalars_checked": len(unicode_scalars),

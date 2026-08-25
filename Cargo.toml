@@ -1,10 +1,10 @@
 [package]
 name = "pickle50"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 autobins = false
 license = "Apache-2.0"
-description = "Self-contained packed inference, TokenMonster, and retrieval runtime for PICKLE-50M"
+description = "Self-contained packed Q2/Q3/Q4 inference, native tokenizers, and retrieval runtime for PICKLE-50M"
 
 [dependencies]
 rayon = { version = "=1.11.0", default-features = false }

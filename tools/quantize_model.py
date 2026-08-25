@@ -1,4 +1,4 @@
-"""Compress Stentor3-50M into a self-contained, deterministic 2-bit artifact.
+"""Compress a supported Llama checkpoint into a deterministic low-bit artifact.
 
 This is post-training compression. It performs no gradient updates and consumes no
 training or calibration examples.
@@ -18,14 +18,16 @@ from pathlib import Path
 import numpy as np
 from safetensors import safe_open
 
-from pklm_format import LEVELS, MAGIC, Q4_LEVELS, read_container
+from pklm_format import LEVELS, MAGIC, Q3_LEVELS, Q4_LEVELS, read_container
 
 
 EMBEDDED_FILES = (
     "config.json",
     "tokenizer_config.json",
+    "tokenizer.json",
     "tokenmonster.vocab",
     "tokenmonster_hf.py",
+    "generation_config.json",
 )
 
 
@@ -52,6 +54,21 @@ def pack_nibbles(codes: np.ndarray) -> bytes:
         codes = np.pad(codes, (0, padding), constant_values=0)
     codes = codes.reshape(-1, 2).astype(np.uint8, copy=False)
     return (codes[:, 0] | (codes[:, 1] << 4)).tobytes()
+
+
+def pack_q3(codes: np.ndarray) -> bytes:
+    padding = (-codes.size) % 8
+    if padding:
+        codes = np.pad(codes, (0, padding), constant_values=0)
+    values = codes.reshape(-1, 8).astype(np.uint32, copy=False)
+    words = np.zeros(values.shape[0], dtype=np.uint32)
+    for index in range(8):
+        words |= values[:, index] << (index * 3)
+    packed = np.empty((values.shape[0], 3), dtype=np.uint8)
+    packed[:, 0] = words & 0xFF
+    packed[:, 1] = (words >> 8) & 0xFF
+    packed[:, 2] = (words >> 16) & 0xFF
+    return packed.tobytes()
 
 
 def quantize_q2(
@@ -102,6 +119,104 @@ def quantize_q2(
         "squared_reconstructed": squared_reconstructed,
     }
     return payload, metrics
+
+
+def quantize_q2_symmetric(
+    array: np.ndarray, group_size: int, refinement_rounds: int = 2
+) -> tuple[bytes, dict[str, float | int]]:
+    """Two-bit blocks with two learned symmetric magnitudes per group."""
+    original = np.asarray(array, dtype=np.float32).reshape(-1)
+    count = original.size
+    groups = math.ceil(count / group_size)
+    padded = np.zeros(groups * group_size, dtype=np.float32)
+    padded[:count] = original
+    blocks = padded.reshape(groups, group_size)
+    absolute = np.abs(blocks)
+    rms = np.maximum(
+        np.sqrt(np.mean(blocks * blocks, axis=1, dtype=np.float32)),
+        np.float32(1e-12),
+    )
+    inner = rms * np.float32(abs(LEVELS[1]))
+    outer = rms * np.float32(abs(LEVELS[0]))
+    outer_mask = np.zeros_like(blocks, dtype=bool)
+    for _ in range(refinement_rounds):
+        outer_mask = absolute >= ((inner + outer) * np.float32(0.5))[:, None]
+        inner_count = np.sum(~outer_mask, axis=1)
+        outer_count = np.sum(outer_mask, axis=1)
+        inner = np.divide(
+            np.sum(np.where(~outer_mask, absolute, 0.0), axis=1, dtype=np.float32),
+            inner_count,
+            out=inner,
+            where=inner_count > 0,
+        )
+        outer = np.divide(
+            np.sum(np.where(outer_mask, absolute, 0.0), axis=1, dtype=np.float32),
+            outer_count,
+            out=outer,
+            where=outer_count > 0,
+        )
+    # Evaluate the exact FP16 codebook that is serialized.
+    magnitudes = np.stack((inner, outer), axis=1).astype("<f2")
+    exact = magnitudes.astype(np.float32)
+    negative = blocks < 0
+    codes = np.where(outer_mask, np.where(negative, 0, 3), np.where(negative, 1, 2)).astype(
+        np.uint8
+    )
+    reconstructed_blocks = np.where(outer_mask, exact[:, 1, None], exact[:, 0, None])
+    reconstructed_blocks = np.where(negative, -reconstructed_blocks, reconstructed_blocks)
+    reconstructed = reconstructed_blocks.reshape(-1)[:count]
+    error = reconstructed - original
+    original64 = original.astype(np.float64)
+    reconstructed64 = reconstructed.astype(np.float64)
+    error64 = error.astype(np.float64)
+    payload = magnitudes.tobytes() + pack_codes(codes.reshape(-1))
+    return payload, {
+        "groups": groups,
+        "squared_error": float(np.dot(error64, error64)),
+        "squared_original": float(np.dot(original64, original64)),
+        "dot": float(np.dot(original64, reconstructed64)),
+        "squared_reconstructed": float(np.dot(reconstructed64, reconstructed64)),
+    }
+
+
+def quantize_q3(
+    array: np.ndarray, group_size: int, refinement_rounds: int = 2
+) -> tuple[bytes, dict[str, float | int]]:
+    original = np.asarray(array, dtype=np.float32).reshape(-1)
+    count = original.size
+    groups = math.ceil(count / group_size)
+    padded = np.zeros(groups * group_size, dtype=np.float32)
+    padded[:count] = original
+    blocks = padded.reshape(groups, group_size)
+    rms = np.maximum(np.sqrt(np.mean(blocks * blocks, axis=1)), np.float32(1e-12))
+    scales = rms
+    codes = np.zeros_like(blocks, dtype=np.uint8)
+    for _ in range(refinement_rounds):
+        distances = np.abs(
+            blocks[:, :, None] - scales[:, None, None] * Q3_LEVELS[None, None, :]
+        )
+        codes = np.argmin(distances, axis=2).astype(np.uint8)
+        selected = Q3_LEVELS[codes]
+        numerator = np.sum(blocks * selected, axis=1, dtype=np.float32)
+        denominator = np.sum(selected * selected, axis=1, dtype=np.float32)
+        scales = np.divide(
+            numerator,
+            denominator,
+            out=np.full_like(numerator, 1e-12),
+            where=denominator > 0,
+        )
+    exact_scales = scales.astype("<f2")
+    reconstructed = (Q3_LEVELS[codes] * exact_scales.astype(np.float32)[:, None]).reshape(-1)[:count]
+    original64 = original.astype(np.float64)
+    reconstructed64 = reconstructed.astype(np.float64)
+    error64 = reconstructed64 - original64
+    return exact_scales.tobytes() + pack_q3(codes.reshape(-1)), {
+        "groups": groups,
+        "squared_error": float(np.dot(error64, error64)),
+        "squared_original": float(np.dot(original64, original64)),
+        "dot": float(np.dot(original64, reconstructed64)),
+        "squared_reconstructed": float(np.dot(reconstructed64, reconstructed64)),
+    }
 
 
 def quantize_q4(
@@ -161,10 +276,10 @@ def select_q4_by_error_budget(
     if budget_bytes < 0:
         raise ValueError("Q4 extra-byte budget cannot be negative")
     candidates: list[dict[str, object]] = []
-    with safe_open(model_path, framework="np") as model:
+    with safe_open(model_path, framework="pt", device="cpu") as model:
         names = sorted(model.keys())
         for index, name in enumerate(names, 1):
-            array = np.asarray(model.get_tensor(name), dtype=np.float32)
+            array = model.get_tensor(name).float().numpy()
             if array.ndim < 2:
                 continue
             q2_data, q2_metrics = quantize_q2(array, group_size, refinement_rounds)
@@ -244,8 +359,24 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", required=True, type=Path, help="directory containing model.safetensors")
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--base-model",
+        default="StentorLabs/Stentor3-50M",
+        help="public source model identifier",
+    )
+    parser.add_argument(
+        "--base-revision", default="main", help="immutable public source revision"
+    )
+    parser.add_argument("--license", default="Apache-2.0")
     parser.add_argument("--group-size", type=int, default=256)
     parser.add_argument("--refinement-rounds", type=int, default=6)
+    parser.add_argument("--quant-bits", type=int, choices=(2, 3), default=2)
+    parser.add_argument(
+        "--q2-method",
+        choices=("fixed", "symmetric"),
+        default="fixed",
+        help="two-bit block codebook; symmetric learns two magnitudes per weight group",
+    )
     parser.add_argument(
         "--q4-pattern",
         action="append",
@@ -277,6 +408,8 @@ def main() -> int:
         parser.error("--group-size must be positive and divisible by four")
     if args.refinement_rounds <= 0:
         parser.error("--refinement-rounds must be positive")
+    if args.quant_bits == 3 and args.auto_q4_extra_bytes is not None:
+        parser.error("automatic Q4 selection currently requires a two-bit base")
     model_path = args.source / "model.safetensors"
     if not model_path.exists():
         parser.error(f"missing {model_path}")
@@ -310,10 +443,10 @@ def main() -> int:
     total_dot = 0.0
     total_squared_reconstructed = 0.0
 
-    with safe_open(model_path, framework="np") as model:
+    with safe_open(model_path, framework="pt", device="cpu") as model:
         names = sorted(model.keys())
         for index, name in enumerate(names, 1):
-            array = np.asarray(model.get_tensor(name), dtype=np.float32)
+            array = model.get_tensor(name).float().numpy()
             count = int(array.size)
             parameters += count
             offset = len(payload)
@@ -331,10 +464,21 @@ def main() -> int:
                     )
                     kind = "q4_block"
                 else:
-                    data, metrics = quantize_q2(
-                        array, args.group_size, args.refinement_rounds
-                    )
-                    kind = "q2_block"
+                    if args.quant_bits == 3:
+                        data, metrics = quantize_q3(
+                            array, args.group_size, args.refinement_rounds
+                        )
+                        kind = "q3_block"
+                    elif args.q2_method == "symmetric":
+                        data, metrics = quantize_q2_symmetric(
+                            array, args.group_size, args.refinement_rounds
+                        )
+                        kind = "q2_symmetric"
+                    else:
+                        data, metrics = quantize_q2(
+                            array, args.group_size, args.refinement_rounds
+                        )
+                        kind = "q2_block"
                 groups = int(metrics["groups"])
                 total_squared_error += float(metrics["squared_error"])
                 total_squared_original += float(metrics["squared_original"])
@@ -392,9 +536,9 @@ def main() -> int:
     )
     manifest = {
         "format": "pickle-low-bit-model-v1",
-        "base_model": "StentorLabs/Stentor3-50M",
-        "base_revision": "main",
-        "license": "Apache-2.0",
+        "base_model": args.base_model,
+        "base_revision": args.base_revision,
+        "license": args.license,
         "training_performed": False,
         "quantization": {
             "method": (
@@ -402,9 +546,11 @@ def main() -> int:
                 if auto_selection is not None
                 else "mixed-fixed-level-block"
             ),
-            "nominal_bits": 2,
+            "nominal_bits": args.quant_bits,
             "group_size": args.group_size,
             "q2_levels": LEVELS.tolist(),
+            "q3_levels": Q3_LEVELS.tolist(),
+            "q2_method": args.q2_method,
             "q4_levels": Q4_LEVELS.tolist(),
             "q4_patterns": sorted(selected_q4) if selected_q4 is not None else args.q4_pattern,
             "q2_overrides": args.q2_pattern,

@@ -8,8 +8,15 @@ use rayon::prelude::*;
 use crate::sha256;
 use crate::tokenizer::Tokenizer;
 
-const MAGIC: &[u8; 8] = b"PKNATV3\0";
+const MAGIC_V3: &[u8; 8] = b"PKNATV3\0";
+const MAGIC_V4: &[u8; 8] = b"PKNATV4\0";
+const FLAG_TIED_EMBEDDINGS: u32 = 1 << 0;
+const FLAG_DEFAULT_ADD_BOS: u32 = 1 << 1;
+const KNOWN_V4_FLAGS: u32 = FLAG_TIED_EMBEDDINGS | FLAG_DEFAULT_ADD_BOS;
 const Q2: [f32; 4] = [-1.510418, -0.452780, 0.452780, 1.510418];
+const Q3: [f32; 8] = [
+    -2.151933, -1.343899, -0.755999, -0.2450922, 0.2450922, 0.755999, 1.343899, 2.151933,
+];
 const Q4: [f32; 16] = [
     -1.0,
     -0.6961928,
@@ -32,6 +39,8 @@ const Q4: [f32; 16] = [
 #[derive(Clone, Copy)]
 enum Kind {
     Q2,
+    Q2Symmetric,
+    Q3,
     Q4,
 }
 
@@ -69,8 +78,13 @@ pub struct Model {
     pub head_dim: usize,
     pub context: usize,
     pub bos_token: u32,
+    #[allow(dead_code)]
     pub eos_token: u32,
+    #[allow(dead_code)]
     pub pad_token: u32,
+    pub format_version: u32,
+    pub tied_embeddings: bool,
+    pub default_add_bos: bool,
     rms_eps: f32,
     rope_theta: f32,
     embed: Tensor,
@@ -185,7 +199,9 @@ fn take_tensor(
 ) -> io::Result<Tensor> {
     let kind = match take_kind(data, cursor)? {
         2 => Kind::Q2,
+        3 => Kind::Q2Symmetric,
         4 => Kind::Q4,
+        5 => Kind::Q3,
         _ => return Err(invalid("quantized tensor has unsupported kind")),
     };
     let count = rows
@@ -198,10 +214,15 @@ fn take_tensor(
     }
     let groups = count / group_size;
     let packed = match kind {
-        Kind::Q2 => count.div_ceil(4),
+        Kind::Q2 | Kind::Q2Symmetric => count.div_ceil(4),
+        Kind::Q3 => count.div_ceil(8) * 3,
         Kind::Q4 => count.div_ceil(2),
     };
-    let scale_bytes = groups * 2;
+    let scale_bytes = groups
+        * match kind {
+            Kind::Q2Symmetric => 4,
+            Kind::Q2 | Kind::Q3 | Kind::Q4 => 2,
+        };
     let end = cursor
         .checked_add(scale_bytes + packed)
         .ok_or_else(|| invalid("tensor byte size overflow"))?;
@@ -223,10 +244,12 @@ fn take_tensor(
 impl Model {
     pub fn load(path: &Path) -> io::Result<Self> {
         let data = fs::read(path)?;
-        if data.get(..MAGIC.len()) != Some(MAGIC) {
-            return Err(invalid("not a PICKLE native model v3"));
-        }
-        let mut cursor = MAGIC.len();
+        let format_version = match data.get(..8) {
+            Some(magic) if magic == MAGIC_V3 => 3,
+            Some(magic) if magic == MAGIC_V4 => 4,
+            _ => return Err(invalid("not a supported PICKLE native model")),
+        };
+        let mut cursor = 8;
         let group_size = read_u32(&data, &mut cursor)? as usize;
         let layers_count = read_u32(&data, &mut cursor)? as usize;
         let hidden = read_u32(&data, &mut cursor)? as usize;
@@ -241,6 +264,16 @@ impl Model {
         let pad_token = read_u32(&data, &mut cursor)?;
         let rms_eps = read_f32(&data, &mut cursor)?;
         let rope_theta = read_f32(&data, &mut cursor)?;
+        let flags = if format_version >= 4 {
+            read_u32(&data, &mut cursor)?
+        } else {
+            FLAG_DEFAULT_ADD_BOS
+        };
+        if flags & !KNOWN_V4_FLAGS != 0 {
+            return Err(invalid("native model uses unsupported feature flags"));
+        }
+        let tied_embeddings = flags & FLAG_TIED_EMBEDDINGS != 0;
+        let default_add_bos = flags & FLAG_DEFAULT_ADD_BOS != 0;
         let body_bytes = usize::try_from(read_u64(&data, &mut cursor)?)
             .map_err(|_| invalid("native model body is too large"))?;
         let digest_offset = cursor;
@@ -311,7 +344,11 @@ impl Model {
             });
         }
         let final_norm = take_norm(&data, &mut cursor, hidden)?;
-        let lm_head = take_tensor(&data, &mut cursor, vocab_size, hidden, group_size)?;
+        let lm_head = if tied_embeddings {
+            embed
+        } else {
+            take_tensor(&data, &mut cursor, vocab_size, hidden, group_size)?
+        };
 
         let tokenizer_bytes = read_u32(&data, &mut cursor)? as usize;
         let end = cursor
@@ -319,7 +356,7 @@ impl Model {
             .ok_or_else(|| invalid("native tokenizer length overflow"))?;
         let tokenizer_data = data
             .get(cursor..end)
-            .ok_or_else(|| invalid("truncated native TokenMonster vocabulary"))?;
+            .ok_or_else(|| invalid("truncated native tokenizer"))?;
         let tokenizer = Tokenizer::load(tokenizer_data, vocab_size)?;
         cursor = end;
         if cursor != data.len() {
@@ -340,6 +377,9 @@ impl Model {
             bos_token,
             eos_token,
             pad_token,
+            format_version,
+            tied_embeddings,
+            default_add_bos,
             rms_eps,
             rope_theta,
             embed,
@@ -388,6 +428,10 @@ impl Model {
 
     pub fn decode(&self, tokens: &[u32]) -> String {
         self.tokenizer.decode(tokens)
+    }
+
+    pub fn tokenizer_name(&self) -> &'static str {
+        self.tokenizer.name()
     }
 
     pub fn encode(&self, text: &str, add_bos: bool) -> Vec<u32> {
@@ -601,27 +645,44 @@ fn scale(data: &[u8], tensor: Tensor, group: usize) -> f32 {
     half_to_f32(u16::from_le_bytes([data[offset], data[offset + 1]]))
 }
 
+#[inline]
+fn q2_levels(data: &[u8], tensor: Tensor, group: usize) -> [f32; 4] {
+    if !matches!(tensor.kind, Kind::Q2Symmetric) {
+        return Q2;
+    }
+    let offset = tensor.offset + group * 4;
+    let inner = half_to_f32(u16::from_le_bytes([data[offset], data[offset + 1]]));
+    let outer = half_to_f32(u16::from_le_bytes([data[offset + 2], data[offset + 3]]));
+    [-outer, -inner, inner, outer]
+}
+
 fn dequant_row(data: &[u8], tensor: Tensor, row: usize, group_size: usize, output: &mut [f32]) {
     debug_assert!(row < tensor.rows && output.len() == tensor.cols);
     let groups_per_row = tensor.cols / group_size;
     let packed_per_group = match tensor.kind {
-        Kind::Q2 => group_size / 4,
+        Kind::Q2 | Kind::Q2Symmetric => group_size / 4,
+        Kind::Q3 => group_size / 8 * 3,
         Kind::Q4 => group_size / 2,
     };
     for group_in_row in 0..groups_per_row {
         let group = row * groups_per_row + group_in_row;
-        let factor = scale(data, tensor, group);
+        let factor = if matches!(tensor.kind, Kind::Q2Symmetric) {
+            1.0
+        } else {
+            scale(data, tensor, group)
+        };
         let code_start = tensor.codes_offset + group * packed_per_group;
         let out_start = group_in_row * group_size;
         match tensor.kind {
-            Kind::Q2 => {
+            Kind::Q2 | Kind::Q2Symmetric => {
+                let levels = q2_levels(data, tensor, group);
                 for packed_index in 0..packed_per_group {
                     let byte = data[code_start + packed_index];
                     let base = out_start + packed_index * 4;
-                    output[base] = factor * Q2[(byte & 3) as usize];
-                    output[base + 1] = factor * Q2[((byte >> 2) & 3) as usize];
-                    output[base + 2] = factor * Q2[((byte >> 4) & 3) as usize];
-                    output[base + 3] = factor * Q2[(byte >> 6) as usize];
+                    output[base] = factor * levels[(byte & 3) as usize];
+                    output[base + 1] = factor * levels[((byte >> 2) & 3) as usize];
+                    output[base + 2] = factor * levels[((byte >> 4) & 3) as usize];
+                    output[base + 3] = factor * levels[(byte >> 6) as usize];
                 }
             }
             Kind::Q4 => {
@@ -632,20 +693,34 @@ fn dequant_row(data: &[u8], tensor: Tensor, row: usize, group_size: usize, outpu
                     output[base + 1] = factor * Q4[(byte >> 4) as usize];
                 }
             }
+            Kind::Q3 => {
+                for index in 0..group_size {
+                    let bit = index * 3;
+                    let byte_index = bit / 8;
+                    let shift = bit % 8;
+                    let low = data[code_start + byte_index] as u16;
+                    let high = if byte_index + 1 < packed_per_group {
+                        (data[code_start + byte_index + 1] as u16) << 8
+                    } else {
+                        0
+                    };
+                    output[out_start + index] = factor * Q3[(((low | high) >> shift) & 7) as usize];
+                }
+            }
         }
     }
 }
 
-fn scalar_group_sum(kind: Kind, codes: &[u8], input: &[f32]) -> f32 {
+fn scalar_group_sum(kind: Kind, codes: &[u8], input: &[f32], q2: &[f32; 4]) -> f32 {
     let mut sum = 0.0_f32;
     match kind {
-        Kind::Q2 => {
+        Kind::Q2 | Kind::Q2Symmetric => {
             for (packed_index, &byte) in codes.iter().enumerate() {
                 let base = packed_index * 4;
-                sum += input[base] * Q2[(byte & 3) as usize]
-                    + input[base + 1] * Q2[((byte >> 2) & 3) as usize]
-                    + input[base + 2] * Q2[((byte >> 4) & 3) as usize]
-                    + input[base + 3] * Q2[(byte >> 6) as usize];
+                sum += input[base] * q2[(byte & 3) as usize]
+                    + input[base + 1] * q2[((byte >> 2) & 3) as usize]
+                    + input[base + 2] * q2[((byte >> 4) & 3) as usize]
+                    + input[base + 3] * q2[(byte >> 6) as usize];
             }
         }
         Kind::Q4 => {
@@ -653,6 +728,14 @@ fn scalar_group_sum(kind: Kind, codes: &[u8], input: &[f32]) -> f32 {
                 let base = packed_index * 2;
                 sum += input[base] * Q4[(byte & 15) as usize]
                     + input[base + 1] * Q4[(byte >> 4) as usize];
+            }
+        }
+        Kind::Q3 => {
+            for (chunk, values) in codes.chunks_exact(3).zip(input.chunks_exact(8)) {
+                let word = chunk[0] as u32 | (chunk[1] as u32) << 8 | (chunk[2] as u32) << 16;
+                for (index, &value) in values.iter().enumerate() {
+                    sum += value * Q3[((word >> (index * 3)) & 7) as usize];
+                }
             }
         }
     }
@@ -678,10 +761,10 @@ use std::arch::x86_64 as arch;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[target_feature(enable = "avx2")]
-unsafe fn avx2_group_sum(kind: Kind, codes: &[u8], input: &[f32]) -> f32 {
+unsafe fn avx2_group_sum(kind: Kind, codes: &[u8], input: &[f32], q2: &[f32; 4]) -> f32 {
     let mut accumulator = arch::_mm256_setzero_ps();
     match kind {
-        Kind::Q2 => {
+        Kind::Q2 | Kind::Q2Symmetric => {
             debug_assert_eq!(input.len(), codes.len() * 4);
             for packed in 0..codes.len() / 2 {
                 let first = codes[packed * 2];
@@ -696,7 +779,7 @@ unsafe fn avx2_group_sum(kind: Kind, codes: &[u8], input: &[f32]) -> f32 {
                     ((second >> 4) & 3) as i32,
                     (second >> 6) as i32,
                 );
-                let levels = arch::_mm256_i32gather_ps(Q2.as_ptr(), indices, 4);
+                let levels = arch::_mm256_i32gather_ps(q2.as_ptr(), indices, 4);
                 let values = arch::_mm256_loadu_ps(input.as_ptr().add(packed * 8));
                 accumulator = arch::_mm256_add_ps(accumulator, arch::_mm256_mul_ps(values, levels));
             }
@@ -723,6 +806,25 @@ unsafe fn avx2_group_sum(kind: Kind, codes: &[u8], input: &[f32]) -> f32 {
                 accumulator = arch::_mm256_add_ps(accumulator, arch::_mm256_mul_ps(values, levels));
             }
         }
+        Kind::Q3 => {
+            debug_assert_eq!(input.len() / 8 * 3, codes.len());
+            for (packed, chunk) in codes.chunks_exact(3).enumerate() {
+                let word = chunk[0] as u32 | (chunk[1] as u32) << 8 | (chunk[2] as u32) << 16;
+                let indices = arch::_mm256_setr_epi32(
+                    (word & 7) as i32,
+                    ((word >> 3) & 7) as i32,
+                    ((word >> 6) & 7) as i32,
+                    ((word >> 9) & 7) as i32,
+                    ((word >> 12) & 7) as i32,
+                    ((word >> 15) & 7) as i32,
+                    ((word >> 18) & 7) as i32,
+                    ((word >> 21) & 7) as i32,
+                );
+                let levels = arch::_mm256_i32gather_ps(Q3.as_ptr(), indices, 4);
+                let values = arch::_mm256_loadu_ps(input.as_ptr().add(packed * 8));
+                accumulator = arch::_mm256_add_ps(accumulator, arch::_mm256_mul_ps(values, levels));
+            }
+        }
     }
     let low = arch::_mm256_castps256_ps128(accumulator);
     let high = arch::_mm256_extractf128_ps(accumulator, 1);
@@ -742,13 +844,19 @@ fn row_dot(
 ) -> f32 {
     let groups_per_row = tensor.cols / group_size;
     let packed_per_group = match tensor.kind {
-        Kind::Q2 => group_size / 4,
+        Kind::Q2 | Kind::Q2Symmetric => group_size / 4,
+        Kind::Q3 => group_size / 8 * 3,
         Kind::Q4 => group_size / 2,
     };
     let mut sum = 0.0_f32;
     for group_in_row in 0..groups_per_row {
         let group = row * groups_per_row + group_in_row;
-        let factor = scale(data, tensor, group);
+        let factor = if matches!(tensor.kind, Kind::Q2Symmetric) {
+            1.0
+        } else {
+            scale(data, tensor, group)
+        };
+        let q2 = q2_levels(data, tensor, group);
         let code_start = tensor.codes_offset + group * packed_per_group;
         let codes = &data[code_start..code_start + packed_per_group];
         let input_start = group_in_row * group_size;
@@ -756,12 +864,12 @@ fn row_dot(
         #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
         let group_sum = if use_avx2 {
             // SAFETY: runtime feature detection guarantees AVX2 and slices have exact group sizes.
-            unsafe { avx2_group_sum(tensor.kind, codes, values) }
+            unsafe { avx2_group_sum(tensor.kind, codes, values, &q2) }
         } else {
-            scalar_group_sum(tensor.kind, codes, values)
+            scalar_group_sum(tensor.kind, codes, values, &q2)
         };
         #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
-        let group_sum = scalar_group_sum(tensor.kind, codes, values);
+        let group_sum = scalar_group_sum(tensor.kind, codes, values, &q2);
         sum += group_sum * factor;
     }
     sum
@@ -973,10 +1081,17 @@ mod tests {
         let q4_codes: Vec<u8> = (0..128)
             .map(|index| (index as u8).wrapping_mul(53).wrapping_add(7))
             .collect();
-        for (kind, codes) in [(Kind::Q2, q2_codes), (Kind::Q4, q4_codes)] {
-            let scalar = scalar_group_sum(kind, &codes, &input);
+        let q3_codes: Vec<u8> = (0..96)
+            .map(|index| (index as u8).wrapping_mul(41).wrapping_add(3))
+            .collect();
+        for (kind, codes) in [
+            (Kind::Q2, q2_codes),
+            (Kind::Q3, q3_codes),
+            (Kind::Q4, q4_codes),
+        ] {
+            let scalar = scalar_group_sum(kind, &codes, &input, &super::Q2);
             // SAFETY: the test returns above when AVX2 is unavailable.
-            let vector = unsafe { avx2_group_sum(kind, &codes, &input) };
+            let vector = unsafe { avx2_group_sum(kind, &codes, &input, &super::Q2) };
             assert!((scalar - vector).abs() < 0.0001, "{scalar} != {vector}");
         }
     }

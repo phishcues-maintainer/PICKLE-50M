@@ -25,17 +25,24 @@ def main() -> int:
 
     manifest, payload = read_container(args.artifact)
     args.out.mkdir(parents=True, exist_ok=True)
-    for name in ("config.json", "tokenizer_config.json", "tokenmonster.vocab", "tokenmonster_hf.py"):
+    for entry in manifest["embedded_files"]:
+        name = str(entry["name"])
         (args.out / name).write_bytes(embedded_file(manifest, payload, name))
 
     special = {"bos_token": "<s>", "eos_token": "</s>", "unk_token": "<unk>", "pad_token": "<pad>"}
     (args.out / "special_tokens_map.json").write_text(
         json.dumps(special, indent=2) + "\n", encoding="utf-8"
     )
-    generation = {"bos_token_id": 4068, "eos_token_id": 4069, "pad_token_id": 4071}
-    (args.out / "generation_config.json").write_text(
-        json.dumps(generation, indent=2) + "\n", encoding="utf-8"
-    )
+    if not (args.out / "generation_config.json").exists():
+        config = json.loads((args.out / "config.json").read_text(encoding="utf-8"))
+        generation = {
+            "bos_token_id": config["bos_token_id"],
+            "eos_token_id": config["eos_token_id"],
+            "pad_token_id": config["pad_token_id"],
+        }
+        (args.out / "generation_config.json").write_text(
+            json.dumps(generation, indent=2) + "\n", encoding="utf-8"
+        )
 
     state = {}
     for index, entry in enumerate(manifest["tensors"], 1):

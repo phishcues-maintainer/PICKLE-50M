@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Export the audited PKLM weights into the fixed-layout native runtime format.
+"""Export audited PKLM weights into the self-contained native runtime format.
 
 This does not requantize or otherwise alter a tensor payload. It orders the
-tensors as the native runtime expects and appends the original TokenMonster
-vocabulary so text encoding and decoding are available inside the runtime.
+tensors as the native runtime expects and embeds either a compact TokenMonster
+vocabulary or a compact byte-level BPE tokenizer.
 """
 
 from __future__ import annotations
@@ -17,34 +17,15 @@ from pathlib import Path
 from pklm_format import read_container
 
 
-MAGIC = b"PKNATV3\0"
-GROUP_SIZE = 256
+MAGIC = b"PKNATV4\0"
 TOKENIZER_MAGIC = b"TMC1"
+BPE_MAGIC = b"BPE1"
+FLAG_TIED_EMBEDDINGS = 1 << 0
+FLAG_DEFAULT_ADD_BOS = 1 << 1
 MISSING_U24 = 0xFFFFFF
 MISSING_U13 = 0x1FFF
 MISSING_U16 = 0xFFFF
 FLAG_VALUES = [1, 3, 4, 5, 16, 17, 128, 131, 132, 133, 136, 140, 152, 165]
-
-
-def tensor_order(layers: int) -> list[str]:
-    names = ["model.embed_tokens.weight"]
-    for layer in range(layers):
-        prefix = f"model.layers.{layer}"
-        names.extend(
-            [
-                f"{prefix}.input_layernorm.weight",
-                f"{prefix}.self_attn.q_proj.weight",
-                f"{prefix}.self_attn.k_proj.weight",
-                f"{prefix}.self_attn.v_proj.weight",
-                f"{prefix}.self_attn.o_proj.weight",
-                f"{prefix}.post_attention_layernorm.weight",
-                f"{prefix}.mlp.gate_proj.weight",
-                f"{prefix}.mlp.up_proj.weight",
-                f"{prefix}.mlp.down_proj.weight",
-            ]
-        )
-    names.extend(["model.norm.weight", "lm_head.weight"])
-    return names
 
 
 def expected_layout(config: dict) -> list[tuple[str, str, tuple[int, ...]]]:
@@ -71,12 +52,9 @@ def expected_layout(config: dict) -> list[tuple[str, str, tuple[int, ...]]]:
                 (f"{prefix}.mlp.down_proj.weight", "quantized", (hidden, intermediate)),
             ]
         )
-    layout.extend(
-        [
-            ("model.norm.weight", "fp16", (hidden,)),
-            ("lm_head.weight", "quantized", (vocab, hidden)),
-        ]
-    )
+    layout.append(("model.norm.weight", "fp16", (hidden,)))
+    if not bool(config.get("tie_word_embeddings", False)):
+        layout.append(("lm_head.weight", "quantized", (vocab, hidden)))
     return layout
 
 
@@ -165,14 +143,137 @@ def compact_tokenmonster(data: bytes, expected_vocab_size: int) -> bytes:
     return bytes(output)
 
 
-def export(source: Path, config_path: Path, vocab_path: Path, output: Path) -> None:
+def gpt2_byte_encoder() -> dict[int, str]:
+    values = list(range(ord("!"), ord("~") + 1))
+    values += list(range(ord("¡"), ord("¬") + 1))
+    values += list(range(ord("®"), ord("ÿ") + 1))
+    codepoints = values.copy()
+    extra = 0
+    for byte in range(256):
+        if byte not in values:
+            values.append(byte)
+            codepoints.append(256 + extra)
+            extra += 1
+    return dict(zip(values, map(chr, codepoints), strict=True))
+
+
+def compact_byte_bpe(data: bytes, expected_vocab_size: int) -> bytes:
+    document = json.loads(data.decode("utf-8"))
+    model = document.get("model", {})
+    pre = document.get("pre_tokenizer", {})
+    decoder = document.get("decoder", {})
+    if (
+        model.get("type") != "BPE"
+        or pre.get("type") != "ByteLevel"
+        or decoder.get("type") != "ByteLevel"
+        or bool(pre.get("add_prefix_space", False))
+    ):
+        raise ValueError("native BPE export requires GPT-2 byte-level BPE without prefix space")
+
+    vocab_by_text = {str(key): int(value) for key, value in model["vocab"].items()}
+    if len(vocab_by_text) != expected_vocab_size or set(vocab_by_text.values()) != set(
+        range(expected_vocab_size)
+    ):
+        raise ValueError("BPE vocabulary IDs must be contiguous and match the model")
+    vocab = [""] * expected_vocab_size
+    for piece, token_id in vocab_by_text.items():
+        vocab[token_id] = piece
+
+    encoder = gpt2_byte_encoder()
+    inverse = {character: byte for byte, character in encoder.items()}
+    specials = {
+        int(entry["id"]): str(entry["content"])
+        for entry in document.get("added_tokens", [])
+        if bool(entry.get("special", False))
+    }
+    if any(token_id >= expected_vocab_size for token_id in specials):
+        raise ValueError("added BPE token is outside the model vocabulary")
+
+    byte_ids = []
+    unknown_id = vocab_by_text.get(str(model.get("unk_token", "")))
+    for byte in range(256):
+        piece = encoder[byte]
+        if piece not in vocab_by_text and unknown_id is None:
+            raise ValueError(f"BPE vocabulary lacks byte token {byte}")
+        byte_ids.append(vocab_by_text.get(piece, unknown_id))
+
+    reverse: list[bytes] = []
+    for token_id, piece in enumerate(vocab):
+        if token_id in specials:
+            raw = specials[token_id].encode("utf-8")
+        else:
+            try:
+                raw = bytes(inverse[character] for character in piece)
+            except KeyError as error:
+                raise ValueError(f"BPE token {token_id} is not byte-level") from error
+        if len(raw) > 0xFFFF:
+            raise ValueError("BPE token is too long for compact format")
+        reverse.append(raw)
+
+    merge_rows: list[tuple[int, int, int]] = []
+    for rank, item in enumerate(model.get("merges", [])):
+        if isinstance(item, list):
+            left, right = map(str, item)
+        else:
+            left, right = str(item).split(" ", 1)
+        merged = left + right
+        try:
+            merge_rows.append(
+                (vocab_by_text[left], vocab_by_text[right], vocab_by_text[merged])
+            )
+        except KeyError as error:
+            raise ValueError(f"invalid BPE merge at rank {rank}") from error
+
+    output = bytearray(BPE_MAGIC)
+    output.extend(struct.pack("<IIH", expected_vocab_size, len(merge_rows), len(specials)))
+    output.extend(struct.pack("<256H", *byte_ids))
+    for raw in reverse:
+        output.extend(struct.pack("<H", len(raw)))
+        output.extend(raw)
+    for left, right, merged in merge_rows:
+        output.extend(struct.pack("<3H", left, right, merged))
+    for token_id, text in sorted(specials.items()):
+        raw = text.encode("utf-8")
+        output.extend(struct.pack("<HH", token_id, len(raw)))
+        output.extend(raw)
+    return bytes(output)
+
+
+def export(source: Path, config_path: Path, tokenizer_path: Path, output: Path) -> None:
     manifest, payload = read_container(source)
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    tokenmonster_vocab = compact_tokenmonster(
-        vocab_path.read_bytes(), int(config["vocab_size"])
-    )
+    tokenizer_source = tokenizer_path.read_bytes()
+    token_ids = {
+        "bos": int(config["bos_token_id"]),
+        "eos": int(config["eos_token_id"]),
+        "pad": int(config["pad_token_id"]),
+    }
+    if tokenizer_path.suffix.lower() == ".json" or tokenizer_source.lstrip().startswith(b"{"):
+        tokenizer = compact_byte_bpe(tokenizer_source, int(config["vocab_size"]))
+        tokenizer_name = "byte-level-bpe"
+        document = json.loads(tokenizer_source.decode("utf-8"))
+        vocab = {str(key): int(value) for key, value in document["model"]["vocab"].items()}
+        tokenizer_config_path = tokenizer_path.with_name("tokenizer_config.json")
+        if tokenizer_config_path.exists():
+            tokenizer_config = json.loads(tokenizer_config_path.read_text(encoding="utf-8"))
+            for short, field in (("bos", "bos_token"), ("eos", "eos_token"), ("pad", "pad_token")):
+                value = tokenizer_config.get(field)
+                content = value.get("content") if isinstance(value, dict) else value
+                if isinstance(content, str) and content in vocab:
+                    token_ids[short] = vocab[content]
+    else:
+        tokenizer = compact_tokenmonster(tokenizer_source, int(config["vocab_size"]))
+        tokenizer_name = "TokenMonster"
     entries = {entry["name"]: entry for entry in manifest["tensors"]}
     layout = expected_layout(config)
+    group_sizes = {
+        int(entry["group_size"])
+        for entry in entries.values()
+        if entry["kind"] != "fp16"
+    }
+    if len(group_sizes) != 1:
+        raise ValueError(f"native format requires one quantization group size: {group_sizes}")
+    group_size = group_sizes.pop()
 
     if set(entries) != {name for name, _, _ in layout}:
         missing = sorted({name for name, _, _ in layout} - set(entries))
@@ -181,13 +282,15 @@ def export(source: Path, config_path: Path, vocab_path: Path, output: Path) -> N
 
     body = bytearray()
     tensor_bytes = 0
-    kind_codes = {"fp16": 0, "q2_block": 2, "q4_block": 4}
+    kind_codes = {"fp16": 0, "q2_block": 2, "q2_symmetric": 3, "q3_block": 5, "q4_block": 4}
     for name, expected_kind, shape in layout:
         entry = entries[name]
         actual_kind = str(entry["kind"])
         actual_shape = tuple(int(value) for value in entry["shape"])
         kind_valid = actual_kind == "fp16" if expected_kind == "fp16" else actual_kind in {
             "q2_block",
+            "q2_symmetric",
+            "q3_block",
             "q4_block",
         }
         if not kind_valid or actual_shape != shape:
@@ -195,7 +298,7 @@ def export(source: Path, config_path: Path, vocab_path: Path, output: Path) -> N
                 f"unexpected tensor layout for {name}: "
                 f"{actual_kind} {actual_shape}, expected {expected_kind} {shape}"
             )
-        if actual_kind != "fp16" and int(entry["group_size"]) != GROUP_SIZE:
+        if actual_kind != "fp16" and int(entry["group_size"]) != group_size:
             raise ValueError(f"unexpected group size for {name}")
         start = int(entry["offset"])
         end = start + int(entry["length"])
@@ -206,12 +309,22 @@ def export(source: Path, config_path: Path, vocab_path: Path, output: Path) -> N
         body.extend(raw)
         tensor_bytes += len(raw)
 
-    body.extend(struct.pack("<I", len(tokenmonster_vocab)))
-    body.extend(tokenmonster_vocab)
+    body.extend(struct.pack("<I", len(tokenizer)))
+    body.extend(tokenizer)
     body_digest = hashlib.sha256(body).digest()
+    flags = 0
+    if bool(config.get("tie_word_embeddings", False)):
+        flags |= FLAG_TIED_EMBEDDINGS
+    # TokenMonster models historically insert BOS; byte-level BPE follows the
+    # upstream tokenizer, whose post-processor does not add one.
+    if tokenizer_name == "TokenMonster":
+        flags |= FLAG_DEFAULT_ADD_BOS
+    rope_theta = float(
+        config.get("rope_theta", config.get("rope_parameters", {}).get("rope_theta", 10000.0))
+    )
     header_fields = MAGIC + struct.pack(
-        "<12I2fQ",
-        GROUP_SIZE,
+        "<12I2fIQ",
+        group_size,
         int(config["num_hidden_layers"]),
         int(config["hidden_size"]),
         int(config["intermediate_size"]),
@@ -220,11 +333,12 @@ def export(source: Path, config_path: Path, vocab_path: Path, output: Path) -> N
         int(config["num_key_value_heads"]),
         int(config["head_dim"]),
         int(config["max_position_embeddings"]),
-        int(config["bos_token_id"]),
-        int(config["eos_token_id"]),
-        int(config["pad_token_id"]),
+        token_ids["bos"],
+        token_ids["eos"],
+        token_ids["pad"],
         float(config["rms_norm_eps"]),
-        float(config["rope_theta"]),
+        rope_theta,
+        flags,
         len(body),
     )
     authenticated_digest = hashlib.sha256(header_fields + body_digest).digest()
@@ -238,12 +352,14 @@ def export(source: Path, config_path: Path, vocab_path: Path, output: Path) -> N
     print(
         json.dumps(
             {
-                "format": "pickle-native-model-v3",
+                "format": "pickle-native-model-v4",
                 "source": str(source),
                 "output": str(output),
                 "tensor_count": len(layout),
                 "tensor_bytes": tensor_bytes,
-                "tokenmonster_vocab_bytes": len(tokenmonster_vocab),
+                "tokenizer": tokenizer_name,
+                "tokenizer_bytes": len(tokenizer),
+                "tied_embeddings": bool(flags & FLAG_TIED_EMBEDDINGS),
                 "authenticated_body_bytes": len(body),
                 "authenticated_body_sha256": body_digest.hex(),
                 "authenticated_header_and_body_sha256": authenticated_digest.hex(),
@@ -258,10 +374,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--vocab", type=Path, required=True)
+    parser.add_argument("--vocab", "--tokenizer", dest="tokenizer", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    export(args.source, args.config, args.vocab, args.out)
+    export(args.source, args.config, args.tokenizer, args.out)
 
 
 if __name__ == "__main__":

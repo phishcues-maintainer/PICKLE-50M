@@ -1,164 +1,173 @@
 # PICKLE-50M
 
-PICKLE-50M is a transparent, no-training entry for the public 50M-model challenge:
+PICKLE-50M is a reproducible, **no-training-by-this-project** entry for the public small-model
+challenge. The current v1.1 candidate improves the original release instead of hiding its weak
+results:
 
-- 49,430,016 public pretrained parameters compressed without training, fine-tuning,
-  distillation, or calibration examples;
-- native TokenMonster text encoding and packed Q2/Q4 CPU inference;
-- a separate deterministic disk-retrieval and extraction benchmark;
-- public commands and machine-readable evidence.
+- 31,171,072 public pretrained parameters;
+- deterministic, data-free Q3 weight compression;
+- a self-contained Rust CPU runtime with native byte-level BPE text tokenization;
+- a separate disk lookup-and-extraction benchmark;
+- complete commands, hashes, parity tests, corruption tests, and unfiltered standard scores.
 
-Retrieval is not described as model context. Model, runtime, archive, and index sizes are reported
-separately.
+The source checkpoint is
+[`SEN-AGI/Sable-1.1-30M`](https://huggingface.co/SEN-AGI/Sable-1.1-30M) at immutable revision
+`1a845020ed104bd38b67b2a95472fb166cd4a99b`, Apache-2.0. It was pretrained by its authors;
+this project performed **zero** training, fine-tuning, distillation, or example-based calibration.
+The upstream card describes it as a preview base model, so this repository does not present it as
+a production chat model.
+
+Retrieval is reported as a separate system, never as model context.
 
 ## Current deployment
 
-`artifacts/pickle-50m-native.bin` is the authenticated V3 deployment model. It is 15,128,816 bytes
-(14.4280 MiB) and includes the complete compact TokenMonster vocabulary. The same model file is
-used on Windows and Linux.
+`artifacts/pickle-31m-sable-q3.pkn` is the authenticated V4 deployment model. It contains the
+packed Q3 weights, FP16 group scales, dimensions, special-token metadata, and complete compact
+byte-level BPE tokenizer.
 
-| Deployment pair | Model | Runtime | Combined | MiB | Below 15 MiB |
-|---|---:|---:|---:|---:|---:|
-| Windows inference-only | 15,128,816 | 366,592 | 15,495,408 | 14.7776 | 233,232 bytes |
-| Linux inference-only | 15,128,816 | 586,848 | 15,715,664 | 14.9876 | 12,976 bytes |
+| Windows deployment | Model bytes | Runtime bytes | Combined bytes | Combined MiB |
+|---|---:|---:|---:|---:|
+| Inference-only | 12,534,009 | 384,512 | 12,918,521 | 12.3201 |
+| Full utility, including retrieval tools | 12,534,009 | 471,552 | 13,005,561 | 12.4031 |
 
-The full Windows runtime, including retrieval generation/indexing, is also below 15 MiB when
-paired with the model. The full Linux utility binary is reported separately and is not used for
-the inference-only deployment-size claim.
+The model itself is 11.9534 MiB. The inference pair is 2,810,119 bytes below 15 MiB. Linux
+release sizes and a real Linux smoke run are recorded in [RESULTS.md](RESULTS.md).
 
-The model format authenticates its dimensions, tensor-kind metadata, packed weights, scales, and
-tokenizer data before parsing. Any changed header/body byte, truncation, or trailing byte is
-rejected.
+The V4 loader authenticates its header and body before parsing. Any tested truncation, bit
+mutation, or trailing byte is rejected.
 
-Published artifact hashes are collected in [`CHECKSUMS.sha256`](CHECKSUMS.sha256).
+## What v1.1 fixes
+
+| Measurement | v1.0 | v1.1 candidate | Change |
+|---|---:|---:|---:|
+| Windows inference pair | 14.7776 MiB | 12.3201 MiB | 16.63% smaller |
+| i5-7500 packed decode, AVX2, 4 workers | 67.622 tok/s | 111.460 tok/s | 64.83% faster |
+| Peak sampled working set | 20.707 MiB | 18.102 MiB | 12.58% lower |
+| Native arbitrary-text tokenizer | TokenMonster | Byte-level BPE | exact reference parity |
+| PIQA normalized, full validation set | 53.3732% | 55.9304% | +2.5572 points |
+| ARC-Easy normalized, full validation set | 27.9040% | 32.8283% | +4.9243 points |
+
+HellaSwag is essentially flat and ARC-Challenge regresses by 0.69 percentage point. Both are
+published in [RESULTS.md](RESULTS.md); this is not presented as a universal quality win.
+
+## Validation highlights
+
+| Check | Result |
+|---|---:|
+| Native tokenizer vs Transformers fast tokenizer | 663,409 / 663,409 token IDs exact |
+| Native vs expanded-Q3 logits | 24,000 checked; same argmax; max error 0.00001526 |
+| Native vs reference greedy generation | 16 / 16 token IDs exact |
+| Loader corruption suite | 18 / 18 malformed files rejected |
+| Packed decode on i5-7500, AVX2, four workers, 15 iterations | 111.460 tok/s |
+| Peak sampled Windows working set | 18.102 MiB |
+| Strengthened retrieval bank | 560 / 560 across 12 task types |
+
+Timing boundaries, machines, all four standard scores, raw evidence, and claim boundaries are in
+[RESULTS.md](RESULTS.md).
 
 ## Downloads
 
 - Repository: <https://github.com/phishcues-maintainer/PICKLE-50M>
-- Reproducible release assets: <https://github.com/phishcues-maintainer/PICKLE-50M/releases/tag/v1.0.0>
-- Complete measurements and claim boundaries: [RESULTS.md](RESULTS.md)
-
-## Headline validation
-
-| Check | Result |
-|---|---:|
-| Native TokenMonster parity | 609,889 / 609,889 token IDs exact |
-| Native vs reconstructed reference generation | 16 / 16 greedy token IDs exact |
-| Loader corruption suite | 18 / 18 malformed models rejected |
-| Linux release smoke | Hashes matched; load, text generation, and AVX2 benchmark passed |
-| i5-7500 packed AVX2 decode, four workers | 67.622 tok/s |
-| Warm arbitrary-text request, 32 generated tokens | 143.1 ms TTFT, 53.696 tok/s |
-| Strengthened retrieval bank | 560 / 560 across 12 task types |
-
-Throughput numbers are local measurements, not a same-hardware victory claim. Timing boundaries,
-machine details, accuracy tasks, and raw-result paths are in [RESULTS.md](RESULTS.md).
+- v1.1 release: <https://github.com/phishcues-maintainer/PICKLE-50M/releases/tag/v1.1.0>
+- Checksums: [CHECKSUMS.sha256](CHECKSUMS.sha256)
+- Copy-ready challenge response: [REDDIT_DRAFT.md](REDDIT_DRAFT.md)
 
 ## Build and run
 
 ```powershell
-cargo build --release --bin pickle50
-cargo build --release --bin pickle50-infer
+cargo build --release
 cargo test --release
 
 bin/pickle50-infer.exe model-generate `
-  --model artifacts/pickle-50m-native.bin `
+  --model artifacts/pickle-31m-sable-q3.pkn `
   --prompt "The history of computing began." `
   --new-tokens 32 --threads 4 --kernel avx2
 ```
 
-`--prompt-file` accepts a UTF-8 text file. `--tokens` remains available for exact low-level tests.
-The inference runtime contains NFD normalization, Unicode-13-compatible NoCapcode handling,
-TokenMonster's ungreedy segmentation, and decoding; Python and the TokenMonster server are not
-deployment dependencies.
+`--prompt` and `--prompt-file` are fully native. Python, Transformers, TokenMonster, and any
+external tokenizer service are not deployment dependencies. `--tokens` remains available for
+exact low-level tests.
 
-Use `--kernel scalar` for the portable reference kernel, `--kernel avx2` to require AVX2, or
+Use `--kernel scalar` for the portable reference path, `--kernel avx2` to require AVX2, or
 `--kernel auto` for runtime detection. `--threads N` controls the persistent worker pool.
 
-## One-command challenge runner
-
-The runner verifies artifact hashes/sizes, measures packed decode, mutation-tests the loader, and
-optionally runs tokenizer parity, native/PyTorch parity, retrieval, and the four standard tasks:
+## One-command challenge validation
 
 ```powershell
 D:/CodexCache/pickle-50m/venv/Scripts/python.exe tools/run_challenge.py `
   --runtime bin/pickle50.exe `
-  --model artifacts/pickle-50m-native.bin `
-  --out results/challenge-v3.json `
-  --threads 4 --kernel avx2 `
-  --vocab D:/CodexCache/pickle-50m/stentor3-50m/tokenmonster.vocab `
-  --reference D:/CodexCache/pickle-50m/eval-balanced
+  --model artifacts/pickle-31m-sable-q3.pkn `
+  --out results/challenge-sable-q3.json `
+  --threads 4 --kernel avx2 --iterations 5 `
+  --tokenizer D:/CodexCache/pickle-50m/sable-30m `
+  --reference D:/CodexCache/pickle-50m/sable-q3-eval `
+  --parity-tokens 2,417,268,283,288,430,17 `
+  --retrieval-tokens 1000000 --retrieval-questions 560
 ```
 
-Add `--run-lm-eval --hf-checkpoint D:/CodexCache/pickle-50m/eval-balanced` to run PIQA,
-HellaSwag, ARC-Easy, and ARC-Challenge. Optional URL and SHA-256 arguments let the runner download
-and authenticate published artifacts before testing.
+The runner records exact file sizes and hashes, model metadata, packed decode, tokenizer parity,
+native/PyTorch parity, loader mutation rejection, and retrieval accuracy/speed in one JSON file.
 
-For a Linux cloud worker, `cloud/setup.sh` exports the selected artifact and installs the pinned
-stack; `cloud/run-all.sh` records the machine and runs all four full tasks in one command.
+## Reproduce the selected compression
 
-## Reproduce the selected quantization
-
-The selected artifact keeps the established attention-sensitive Q4 layout, performs six
-deterministic scale/code refinement rounds, and returns ten lowest reconstruction-benefit
-attention tensors to Q2 so the Linux deployment fits. Selection and refinement use weights only:
-zero training or calibration examples.
+The fixed eight-level Q3 codebook is derived once from an ideal normal distribution. Each
+128-weight group receives an FP16 scale refined for eight deterministic rounds. This process reads
+weights only: there are no prompts, labels, held-out examples, calibration text, gradients, or
+optimizer steps.
 
 ```powershell
 python tools/quantize_model.py `
-  --source D:/CodexCache/pickle-50m/stentor3-50m `
-  --output artifacts/pickle-50m-balanced-refined.pklm `
-  --group-size 256 --refinement-rounds 6 `
-  --q4-list-from artifacts/pickle-50m-mixed-attn.pklm `
-  --q2-pattern model.layers.0.self_attn.v_proj.weight `
-  --q2-pattern model.layers.1.self_attn.v_proj.weight `
-  --q2-pattern model.layers.0.self_attn.k_proj.weight `
-  --q2-pattern model.layers.5.self_attn.k_proj.weight `
-  --q2-pattern model.layers.0.self_attn.q_proj.weight `
-  --q2-pattern model.layers.2.self_attn.v_proj.weight `
-  --q2-pattern model.layers.12.self_attn.k_proj.weight `
-  --q2-pattern model.layers.1.self_attn.k_proj.weight `
-  --q2-pattern model.layers.11.self_attn.k_proj.weight `
-  --q2-pattern model.layers.13.self_attn.k_proj.weight
+  --source D:/CodexCache/pickle-50m/sable-30m `
+  --output artifacts/pickle-31m-sable-q3.pklm `
+  --base-model SEN-AGI/Sable-1.1-30M `
+  --base-revision 1a845020ed104bd38b67b2a95472fb166cd4a99b `
+  --license Apache-2.0 `
+  --quant-bits 3 --group-size 128 --refinement-rounds 8
 
 python tools/export_native.py `
-  --source artifacts/pickle-50m-balanced-refined.pklm `
-  --config D:/CodexCache/pickle-50m/stentor3-50m/config.json `
-  --vocab D:/CodexCache/pickle-50m/stentor3-50m/tokenmonster.vocab `
-  --out artifacts/pickle-50m-native.bin
+  --source artifacts/pickle-31m-sable-q3.pklm `
+  --config D:/CodexCache/pickle-50m/sable-30m/config.json `
+  --tokenizer D:/CodexCache/pickle-50m/sable-30m/tokenizer.json `
+  --out artifacts/pickle-31m-sable-q3.pkn
 ```
 
-`--auto-q4-extra-bytes N` is also available. It performs an exact whole-tensor knapsack search
-that maximizes reconstruction-error reduction within a byte budget and records every candidate
-and selection in the PKLM manifest.
+The audited PKLM manifest pins the upstream revision and source SHA-256, records
+`training_performed: false`, and embeds the config, tokenizer, tokenizer config, and generation
+config. Its measured global weight cosine is 0.986646 and normalized RMSE is 0.162881.
 
-## Validation commands
+## Standard evaluation
+
+Expand the exact values represented by the PKLM file, then use the unmodified harness:
 
 ```powershell
-python tools/profile_kernels.py `
-  --runtime bin/pickle50.exe --model artifacts/pickle-50m-native.bin `
-  --threads 4 --out results/kernel-profile-v3.json
+python tools/export_hf.py `
+  --source artifacts/pickle-31m-sable-q3.pklm `
+  --out D:/CodexCache/pickle-50m/sable-q3-eval
 
-python tools/fuzz_native.py `
-  --runtime bin/pickle50.exe --model artifacts/pickle-50m-native.bin `
-  --out results/native-mutation-test.json
-
-python tools/validate_tokenizer.py `
-  --runtime bin/pickle50.exe --model artifacts/pickle-50m-native.bin `
-  --vocab D:/CodexCache/pickle-50m/stentor3-50m/tokenmonster.vocab `
-  --out results/native-tokenizer-validation.json
+lm_eval --model hf `
+  --model_args pretrained=D:/CodexCache/pickle-50m/sable-q3-eval,dtype=float32 `
+  --tasks piqa,hellaswag,arc_easy,arc_challenge `
+  --num_fewshot 0 --batch_size 64 `
+  --output_path results/lm-eval-sable-q3
 ```
-
-See [RESULTS.md](RESULTS.md) for measurements and claim boundaries.
 
 ## Retrieval coverage
 
-The generated bank now covers direct lookup, close lookalikes, latest-wins duplicates, two-hop
+The generated bank covers direct lookup, close lookalikes, latest-wins duplicates, two-hop
 references, absent identifiers, Unicode identifiers, long values, malformed records, missing
-pointers, punctuation, case-sensitive collisions, and adversarial abstention. Index build time,
-index size, sequential latency, and concurrent throughput are recorded separately.
+pointers, punctuation, case-sensitive collisions, and adversarial abstention. The index stores
+identifiers and archive byte ranges, never answers; answers are read from the archive at query
+time.
+
+## Claim boundary
+
+This repository makes the entry reproducible; it does not declare a head-to-head winner before the
+other model, immutable commit, artifacts, and commands are public and both entries are run on the
+same idle hardware with identical timing boundaries.
 
 ## Provenance and licensing
 
-The base model is [`StentorLabs/Stentor3-50M`](https://huggingface.co/StentorLabs/Stentor3-50M),
-Apache-2.0. PICKLE-50M does not claim authorship of its pretraining. Project code is Apache-2.0;
-see [LICENSE](LICENSE) and [THIRD_PARTY.md](THIRD_PARTY.md) for dependency and data attribution.
+The current source model is
+[`SEN-AGI/Sable-1.1-30M`](https://huggingface.co/SEN-AGI/Sable-1.1-30M), Apache-2.0.
+PICKLE-50M does not claim authorship of its pretraining. Project code is Apache-2.0; see
+[LICENSE](LICENSE) and [THIRD_PARTY.md](THIRD_PARTY.md).

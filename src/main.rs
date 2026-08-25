@@ -790,8 +790,12 @@ fn load_native(opts: &HashMap<String, String>) -> io::Result<native::Model> {
 fn model_info(opts: &HashMap<String, String>) -> io::Result<()> {
     let model = load_native(opts)?;
     println!(
-        "{{\n  \"format\": \"pickle-native-model-v3\",\n  \"authenticated_sha256\": true,\n  \"authenticated_header_and_body_sha256\": \"{}\",\n  \"native_tokenizer\": \"TokenMonster\",\n  \"kernel\": \"{}\",\n  \"worker_threads\": {},\n  \"model_bytes\": {},\n  \"layers\": {},\n  \"hidden_size\": {},\n  \"intermediate_size\": {},\n  \"vocab_size\": {},\n  \"attention_heads\": {},\n  \"kv_heads\": {},\n  \"head_dim\": {},\n  \"context\": {},\n  \"group_size\": {},\n  \"bos_token_id\": {},\n  \"eos_token_id\": {},\n  \"pad_token_id\": {}\n}}",
+        "{{\n  \"format\": \"pickle-native-model-v{}\",\n  \"authenticated_sha256\": true,\n  \"authenticated_header_and_body_sha256\": \"{}\",\n  \"native_tokenizer\": \"{}\",\n  \"tied_embeddings\": {},\n  \"default_add_bos\": {},\n  \"kernel\": \"{}\",\n  \"worker_threads\": {},\n  \"model_bytes\": {},\n  \"layers\": {},\n  \"hidden_size\": {},\n  \"intermediate_size\": {},\n  \"vocab_size\": {},\n  \"attention_heads\": {},\n  \"kv_heads\": {},\n  \"head_dim\": {},\n  \"context\": {},\n  \"group_size\": {},\n  \"bos_token_id\": {},\n  \"eos_token_id\": {},\n  \"pad_token_id\": {}\n}}",
+        model.format_version,
         model.authenticated_sha256(),
+        model.tokenizer_name(),
+        model.tied_embeddings,
+        model.default_add_bos,
         model.kernel_name(),
         rayon::current_num_threads(),
         model.bytes(),
@@ -834,7 +838,15 @@ fn model_input(
     } else {
         fs::read_to_string(required(opts, "prompt-file")?)?
     };
-    let add_bos = parse_u64(opts, "add-bos", Some(if prompt_adds_bos { 1 } else { 0 }))?;
+    let add_bos = parse_u64(
+        opts,
+        "add-bos",
+        Some(if prompt_adds_bos && model.default_add_bos {
+            1
+        } else {
+            0
+        }),
+    )?;
     if add_bos > 1 {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,

@@ -69,7 +69,12 @@ def main() -> int:
     parser.add_argument("--model-url")
     parser.add_argument("--model-sha256")
     parser.add_argument("--vocab", type=Path)
+    parser.add_argument("--tokenizer", type=Path)
     parser.add_argument("--reference", type=Path)
+    parser.add_argument(
+        "--parity-tokens",
+        default="4068,793,3064,728,1178,98,1334,885,2079",
+    )
     parser.add_argument("--retrieval-tokens", type=int, default=100_000)
     parser.add_argument("--retrieval-questions", type=int, default=280)
     parser.add_argument("--skip-retrieval", action="store_true")
@@ -133,7 +138,7 @@ def main() -> int:
     fuzz = json.loads(fuzz_path.read_text(encoding="utf-8"))
 
     tokenizer = None
-    if args.vocab:
+    if args.vocab or args.tokenizer:
         tokenizer_path = args.out.parent / "tokenizer-parity.json"
         _, tokenizer_wall = command(
             [
@@ -143,8 +148,8 @@ def main() -> int:
                 str(runtime),
                 "--model",
                 str(model),
-                "--vocab",
-                str(args.vocab),
+                "--vocab" if args.vocab else "--tokenizer",
+                str(args.vocab or args.tokenizer),
                 "--out",
                 str(tokenizer_path),
             ],
@@ -167,7 +172,7 @@ def main() -> int:
                 "--reference",
                 str(args.reference),
                 "--tokens",
-                "4068,793,3064,728,1178,98,1334,885,2079",
+                args.parity_tokens,
                 "--new-tokens",
                 "16",
                 "--json",

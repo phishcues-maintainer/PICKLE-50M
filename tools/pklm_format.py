@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import struct
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,10 @@ import numpy as np
 
 MAGIC = b"PKLMQ2\x00\x01"
 LEVELS = np.asarray([-1.510418, -0.452780, 0.452780, 1.510418], dtype=np.float32)
+Q3_LEVELS = np.asarray(
+    [-2.151933, -1.343899, -0.755999, -0.2450922, 0.2450922, 0.755999, 1.343899, 2.151933],
+    dtype=np.float32,
+)
 Q4_LEVELS = np.asarray(
     [
         -1.0,
@@ -63,6 +68,21 @@ def unpack_nibbles(packed: bytes, count: int) -> np.ndarray:
     return codes[:count]
 
 
+def unpack_q3(packed: bytes, count: int) -> np.ndarray:
+    source = np.frombuffer(packed, dtype=np.uint8)
+    groups = math.ceil(count / 8)
+    triples = np.zeros((groups, 3), dtype=np.uint32)
+    available = source[: groups * 3].reshape(-1, 3)
+    triples[:, 0] = available[:, 0]
+    triples[:, 1] = available[:, 1]
+    triples[:, 2] = available[:, 2]
+    words = triples[:, 0] | triples[:, 1] << 8 | triples[:, 2] << 16
+    codes = np.empty((groups, 8), dtype=np.uint8)
+    for index in range(8):
+        codes[:, index] = (words >> (index * 3)) & 7
+    return codes.reshape(-1)[:count]
+
+
 def decode_tensor(entry: dict[str, Any], payload: bytes) -> np.ndarray:
     start = int(entry["offset"])
     end = start + int(entry["length"])
@@ -72,21 +92,37 @@ def decode_tensor(entry: dict[str, Any], payload: bytes) -> np.ndarray:
     kind = entry["kind"]
     if kind == "fp16":
         return np.frombuffer(data, dtype="<f2", count=count).astype(np.float32).reshape(shape)
-    if kind not in {"q2_block", "q4_block"}:
+    if kind not in {"q2_block", "q2_symmetric", "q3_block", "q4_block"}:
         raise ValueError(f"unsupported tensor kind: {kind}")
 
     group_size = int(entry["group_size"])
     groups = int(entry["groups"])
-    scale_bytes = groups * 2
-    scales = np.frombuffer(data[:scale_bytes], dtype="<f2", count=groups).astype(np.float32)
+    scale_bytes = groups * (4 if kind == "q2_symmetric" else 2)
     padded_count = groups * group_size
     if kind == "q2_block":
+        scales = np.frombuffer(data[:scale_bytes], dtype="<f2", count=groups).astype(np.float32)
         codes = unpack_codes(data[scale_bytes:], padded_count)
-        levels = LEVELS
+        values = LEVELS[codes] * np.repeat(scales, group_size)
+    elif kind == "q2_symmetric":
+        magnitudes = np.frombuffer(data[:scale_bytes], dtype="<f2", count=groups * 2).astype(
+            np.float32
+        ).reshape(groups, 2)
+        codes = unpack_codes(data[scale_bytes:], padded_count).reshape(groups, group_size)
+        levels = np.stack(
+            (-magnitudes[:, 1], -magnitudes[:, 0], magnitudes[:, 0], magnitudes[:, 1]),
+            axis=1,
+        )
+        values = np.take_along_axis(levels[:, None, :], codes[:, :, None], axis=2)[
+            :, :, 0
+        ].reshape(-1)
+    elif kind == "q3_block":
+        scales = np.frombuffer(data[:scale_bytes], dtype="<f2", count=groups).astype(np.float32)
+        codes = unpack_q3(data[scale_bytes:], padded_count)
+        values = Q3_LEVELS[codes] * np.repeat(scales, group_size)
     else:
+        scales = np.frombuffer(data[:scale_bytes], dtype="<f2", count=groups).astype(np.float32)
         codes = unpack_nibbles(data[scale_bytes:], padded_count)
-        levels = Q4_LEVELS
-    values = levels[codes] * np.repeat(scales, group_size)
+        values = Q4_LEVELS[codes] * np.repeat(scales, group_size)
     return values[:count].reshape(shape)
 
 
