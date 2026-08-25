@@ -1,0 +1,96 @@
+name: Release integrity CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-24.04
+            runtime: ./target/release/pickle50
+            inference_runtime: ./target/release/pickle50-infer
+            python: python3
+          - name: Windows
+            os: windows-2025
+            runtime: ./target/release/pickle50.exe
+            inference_runtime: ./target/release/pickle50-infer.exe
+            python: python
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Rust 1.97.0
+        shell: bash
+        run: |
+          rustup toolchain install 1.97.0 --profile minimal --component rustfmt
+          rustup override set 1.97.0
+          rustc --version
+          cargo --version
+
+      - name: Check formatting
+        shell: bash
+        run: cargo fmt --check
+
+      - name: Run release tests
+        shell: bash
+        run: cargo test --release --locked
+
+      - name: Build release runtimes
+        shell: bash
+        run: cargo build --release --locked
+
+      - name: Verify every published checksum
+        shell: bash
+        run: ${{ matrix.python }} tools/verify_checksums.py CHECKSUMS.sha256
+
+      - name: Enforce the 15 MiB inference deployment ceiling
+        shell: bash
+        run: |
+          model_bytes=$(wc -c < artifacts/pickle-31m-sable-q3.pkn)
+          runtime_bytes=$(wc -c < "${{ matrix.inference_runtime }}")
+          combined_bytes=$((model_bytes + runtime_bytes))
+          limit_bytes=$((15 * 1024 * 1024))
+          echo "combined_bytes=$combined_bytes limit_bytes=$limit_bytes"
+          test "$combined_bytes" -le "$limit_bytes"
+
+      - name: Authenticate and inspect the model
+        shell: bash
+        run: |
+          "${{ matrix.runtime }}" model-info \
+            --model artifacts/pickle-31m-sable-q3.pkn \
+            --threads 2 --kernel auto
+
+      - name: Exercise native arbitrary-text tokenization
+        shell: bash
+        run: |
+          "${{ matrix.runtime }}" model-tokenize \
+            --model artifacts/pickle-31m-sable-q3.pkn \
+            --prompt "CI ✓ arbitrary text Καλημέρα 東京"
+
+      - name: Exercise native generation
+        shell: bash
+        run: |
+          "${{ matrix.inference_runtime }}" model-generate \
+            --model artifacts/pickle-31m-sable-q3.pkn \
+            --prompt "The history of computing began." \
+            --new-tokens 4 --threads 2 --kernel auto

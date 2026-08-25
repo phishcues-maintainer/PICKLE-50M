@@ -1,5 +1,7 @@
 # PICKLE-50M
 
+[![Release integrity CI](https://github.com/phishcues-maintainer/PICKLE-50M/actions/workflows/ci.yml/badge.svg)](https://github.com/phishcues-maintainer/PICKLE-50M/actions/workflows/ci.yml)
+
 PICKLE-50M is a reproducible, **no-training-by-this-project** entry for the public small-model
 challenge. The current v1.1 candidate improves the original release instead of hiding its weak
 results:
