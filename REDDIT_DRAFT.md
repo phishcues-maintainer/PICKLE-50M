@@ -44,14 +44,14 @@ On my Windows i5-7500, packed decode after prefill, fixed seven-token prompt, 32
 - AVX2, 1 thread: 44.550 tok/s
 - AVX2, 4 persistent workers: 111.460 tok/s
 
-All three generated identical token IDs. The one-command arbitrary-text run was noisier and
-measured 98.790 tok/s, so both results are published. The separately sampled process peaked at
-18.102 MiB working set.
+All three generated identical token IDs. The separate one-command arbitrary-text run measured
+92.033 tok/s over 15 iterations, so both timing shapes are published. The separately sampled
+process peaked at 18.102 MiB working set.
 
 I also cloned the exact public commit on a Debian 12 Google `c4-highcpu-16`, built it natively
 with Rust 1.97.0, passed all 11 tests, verified both Linux hashes, loaded/authenticated the model,
 tokenized and generated from arbitrary text, and ran a 15-iteration AVX2 benchmark. That VM
-measured 180.178 tok/s with four workers. It is a portability result, not a comparison with your
+measured 180.884 tok/s with four workers. It is a portability result, not a comparison with your
 model.
 
 Official lm-evaluation-harness 0.4.12, full validation sets, 0-shot, CPU, no sample limit, exact
@@ -72,8 +72,8 @@ For retrieval, I still keep lookup-and-extraction separate and do not call it mo
 seeded 1M-token archive covers 12 task types: direct, lookalike, latest-wins, two-hop, absent,
 Unicode IDs, long values, malformed records, missing pointers, punctuation, case collisions, and
 adversarial abstention. It answered 560/560 correctly. The index is 42,741 bytes; loaded-index
-latency was 4.723 us mean / 4 us p50 / 10 us p95. Reopening the archive per query without clearing
-the OS cache was 29.355 us mean. Four-thread throughput was 262,911 queries/s with 2,800/2,800
+latency was 5.460 us mean / 4 us p50 / 11 us p95. Reopening the archive per query without clearing
+the OS cache was 32.941 us mean. Four-thread throughput was 183,068 queries/s with 8,400/8,400
 correct.
 
 Everything above has raw machine-readable evidence and SHA-256 hashes in the repo. The selected

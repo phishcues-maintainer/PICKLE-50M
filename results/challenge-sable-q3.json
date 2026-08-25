@@ -45,15 +45,25 @@
     "worker_threads": 4,
     "prompt_tokens": 6,
     "timed_decode_tokens_per_iteration": 32,
-    "iterations": 5,
-    "total_elapsed_seconds": 3.195979,
-    "tokens_per_second": 50.062902,
+    "iterations": 15,
+    "total_elapsed_seconds": 5.215507,
+    "tokens_per_second": 92.033233,
     "iteration_tokens_per_second": [
-      17.315883,
-      97.853671,
-      99.125251,
-      96.014008,
-      87.710282
+      89.269723,
+      103.620836,
+      81.251723,
+      90.540396,
+      99.479319,
+      94.705293,
+      99.575838,
+      99.735421,
+      85.245746,
+      87.2023,
+      104.328593,
+      92.007403,
+      87.915155,
+      83.342406,
+      90.303238
     ],
     "allocated_model_and_state_bytes": 13271185,
     "generated_token_ids_last_iteration": [
@@ -100,8 +110,8 @@
     "reference_tokens_checked": 663409,
     "exact": true,
     "failures": [],
-    "elapsed_seconds": 3.378999,
-    "runner_wall_seconds": 10.964421600001515
+    "elapsed_seconds": 3.170542,
+    "runner_wall_seconds": 10.165820000009262
   },
   "native_parity": {
     "format": "pickle-native-validation-v1",
@@ -167,7 +177,7 @@
       ]
     },
     "valid": true,
-    "runner_wall_seconds": 21.326708900000085
+    "runner_wall_seconds": 9.986079199996311
   },
   "loader_mutation_test": {
     "format": "pickle-native-mutation-test-v1",
@@ -312,8 +322,8 @@
       "index": "results\\challenge-retrieval\\archive.idx",
       "index_bytes": 42741,
       "identifiers": 1740,
-      "build_seconds": 0.035582,
-      "archive_mebibytes_per_second": 181.912
+      "build_seconds": 0.034843,
+      "archive_mebibytes_per_second": 185.768
     },
     "benchmark": {
       "format": "pickle-retrieval-result-v2",
@@ -321,29 +331,29 @@
       "archive_bytes": 6787177,
       "index_bytes": 42741,
       "index_entries": 1740,
-      "index_load_ms": 1.146,
+      "index_load_ms": 0.941,
       "questions": 560,
-      "iterations": 5,
+      "iterations": 15,
       "correct": 560,
       "accuracy": 1.0,
       "query_latency_us": {
-        "mean": 5.639,
-        "p50": 5,
-        "p95": 13
+        "mean": 5.46,
+        "p50": 4,
+        "p95": 11
       },
       "reopen_latency_us": {
         "scope": "archive reopened for every query; OS page cache not cleared",
         "correct": 560,
-        "mean": 34.811,
-        "p50": 31,
-        "p95": 59
+        "mean": 32.941,
+        "p50": 29,
+        "p95": 49
       },
       "concurrent": {
         "threads": 4,
-        "queries": 2800,
-        "correct": 2800,
-        "seconds": 0.011765,
-        "queries_per_second": 237990.004
+        "queries": 8400,
+        "correct": 8400,
+        "seconds": 0.045885,
+        "queries_per_second": 183067.957
       },
       "tasks": {
         "abstain": {
@@ -411,8 +421,8 @@
   },
   "lm_eval": null,
   "orchestration_wall_seconds": {
-    "model_info": 0.9273893999925349,
-    "decode_benchmark": 5.449596499995096,
-    "loader_mutation_test": 1.1779033999919193
+    "model_info": 0.08672589999332558,
+    "decode_benchmark": 6.28128119999019,
+    "loader_mutation_test": 1.0459760000085225
   }
 }

@@ -1,6 +1,6 @@
 {
   "format": "pickle-linux-release-smoke-v1",
-  "commit": "b8b1cb9d9c1b2394a6c1878aa587c1454113aee0",
+  "commit": "830d25fa3cffe55f6e62435ac3119dd259d70a74",
   "machine": {
     "provider": "Google Cloud",
     "instance_type": "c4-highcpu-16",
@@ -31,12 +31,12 @@
       "prompt_tokens": 6,
       "generated_tokens_per_iteration": 32,
       "iterations": 15,
-      "cold_load_seconds": 0.055973,
-      "tokenization_seconds": 0.000006,
-      "prefill_seconds": 0.033053,
-      "time_to_first_token_seconds": 0.089031,
-      "decode_seconds": 2.664038,
-      "decode_tokens_per_second": 180.177604
+      "cold_load_seconds": 0.056776,
+      "tokenization_seconds": 0.000007,
+      "prefill_seconds": 0.033245,
+      "time_to_first_token_seconds": 0.090028,
+      "decode_seconds": 2.653638,
+      "decode_tokens_per_second": 180.883763
     }
   },
   "artifacts": {
@@ -47,13 +47,13 @@
     },
     "full_runtime": {
       "path": "bin/pickle50-linux",
-      "bytes": 669608,
-      "sha256": "6a42e4059825870fb48a435ff26406f87b160bd9fe81c31482c778190470be4d"
+      "bytes": 669640,
+      "sha256": "86f356b8cb9f137ad9d1de939aac43e265b9601c87e02a15e39f8820998609c0"
     },
     "inference_runtime": {
       "path": "bin/pickle50-infer-linux",
       "bytes": 581088,
-      "sha256": "6cc0d05a3586e3aea74bd41cc740396d48c492448a8fb96744f88b4a56a12b9c"
+      "sha256": "e9ac21f5beae84453346a4776c0983d1bf2d6c348cf22ceb8c0d01db6f6c1295"
     },
     "inference_pair_bytes": 13115097,
     "inference_pair_mib": 12.5075311660767

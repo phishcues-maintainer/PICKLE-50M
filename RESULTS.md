@@ -49,7 +49,7 @@ The same authenticated model file is used on Windows and Linux.
 | Windows full utility pair | 13,005,561 | 12.4031 | 2,723,079 bytes |
 | Linux inference-only runtime | 581,088 | 0.5542 | — |
 | Linux inference-only pair | 13,115,097 | 12.5075 | 2,613,543 bytes |
-| Linux full utility pair | 13,203,617 | 12.5920 | 2,525,023 bytes |
+| Linux full utility pair | 13,203,649 | 12.5920 | 2,524,991 bytes |
 | Audited PKLM source artifact | 13,892,464 | 13.2489 | — |
 
 The deployment model occupies 3.21683 all-in bits per source parameter, including FP16 scales,
@@ -62,8 +62,8 @@ header, integrity metadata, and the 343,615-byte compact tokenizer. The audited 
 | Native model | `ef082637bd79dfa4d8e216003a71ce4fa11245f27d37e8c38bc0d1593f023140` |
 | Windows inference runtime | `178eeb8b2a5b5f9d4b92dc16c68ca4e6caa8069b18d235d571baf49a09e2494d` |
 | Windows full utility | `c117ad6e29740d0e30165a33c8a85a231aa73f4a71dc90136114062fa5331f9f` |
-| Linux inference runtime | `6cc0d05a3586e3aea74bd41cc740396d48c492448a8fb96744f88b4a56a12b9c` |
-| Linux full utility | `6a42e4059825870fb48a435ff26406f87b160bd9fe81c31482c778190470be4d` |
+| Linux inference runtime | `e9ac21f5beae84453346a4776c0983d1bf2d6c348cf22ceb8c0d01db6f6c1295` |
+| Linux full utility | `86f356b8cb9f137ad9d1de939aac43e265b9601c87e02a15e39f8820998609c0` |
 
 The authenticated header/body digest reported by the loader is
 `18670c7927173f8ff5d1110b4e5c2b7083c92c5318160ce782a7ba26a1a93433`. A deterministic
@@ -131,8 +131,8 @@ fixed seven-token prompt, 32 timed decode tokens, and 15 iterations:
 | AVX2 plus persistent workers | 4 | 111.460 tok/s | 4.339x |
 
 All paths generated identical IDs. The separate one-command challenge run uses an arbitrary text
-prompt and five iterations; one slow iteration reduced its aggregate to 98.790 tok/s. Both values
-are retained rather than choosing only the favorable run.
+prompt and 15 iterations and measured 92.033 tok/s. Both timing shapes are retained rather than
+choosing only the favorable run.
 
 A separately sampled full-utility process peaked at 18.102 MiB working set while decoding at
 94.496 tok/s. Raw evidence: `results/kernel-profile-sable-q3.json`,
@@ -140,7 +140,7 @@ A separately sampled full-utility process peaked at 18.102 MiB working set while
 
 ## Real Linux release validation
 
-Commit `b8b1cb9d9c1b2394a6c1878aa587c1454113aee0` was cloned from the public repository and
+Commit `830d25fa3cffe55f6e62435ac3119dd259d70a74` was checked out from the public repository and
 built natively on the Google Cloud VM with Rust 1.97.0. All 11 release tests passed. Both runtime
 hashes above were taken from that native build.
 
@@ -150,11 +150,11 @@ that VM measured:
 
 | Linux smoke stage | Result |
 |---|---:|
-| Cold model load | 55.973 ms |
-| Tokenization | 0.006 ms |
-| Prompt prefill | 33.053 ms |
-| Time to first token | 89.031 ms |
-| Decode | 180.178 tok/s |
+| Cold model load | 56.776 ms |
+| Tokenization | 0.007 ms |
+| Prompt prefill | 33.245 ms |
+| Time to first token | 90.028 ms |
+| Decode | 180.884 tok/s |
 
 This is a portability result on disclosed hardware, not a comparison against the other entry.
 Raw evidence: `results/linux-sable-q3-smoke.json`.
@@ -214,10 +214,10 @@ adversarial abstention. The index stores identifiers and archive byte ranges, ne
 | Correct | 560/560 (100.00%) |
 | Task types perfect | 12/12 |
 | Index bytes / entries | 42,741 / 1,740 |
-| Index build | 32.701 ms, 197.939 MiB/s |
-| Loaded-index query mean / p50 / p95 | 4.723 / 4 / 10 us |
-| Reopen-per-query mean / p50 / p95 | 29.355 / 28 / 38 us |
-| Four-thread throughput | 262,910.798 queries/s, 2,800/2,800 correct |
+| Index build | 34.843 ms, 185.768 MiB/s |
+| Loaded-index query mean / p50 / p95 | 5.460 / 4 / 11 us |
+| Reopen-per-query mean / p50 / p95 | 32.941 / 29 / 49 us |
+| Four-thread throughput | 183,067.957 queries/s, 8,400/8,400 correct |
 
 “Reopen” means the archive was reopened for every query; the OS page cache was not cleared. It is
 not cold-storage latency. Raw evidence is included inside

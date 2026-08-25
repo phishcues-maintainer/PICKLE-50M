@@ -30,7 +30,7 @@ byte-level BPE tokenizer.
 | Windows inference-only | 12,534,009 | 384,512 | 12,918,521 | 12.3201 |
 | Windows full utility | 12,534,009 | 471,552 | 13,005,561 | 12.4031 |
 | Linux inference-only | 12,534,009 | 581,088 | 13,115,097 | 12.5075 |
-| Linux full utility | 12,534,009 | 669,608 | 13,203,617 | 12.5920 |
+| Linux full utility | 12,534,009 | 669,640 | 13,203,649 | 12.5920 |
 
 The model itself is 11.9534 MiB. Both inference pairs have more than 2.6 MB of margin below
 15 MiB. A native Linux build and real Linux smoke run are recorded in [RESULTS.md](RESULTS.md).
@@ -100,7 +100,7 @@ D:/CodexCache/pickle-50m/venv/Scripts/python.exe tools/run_challenge.py `
   --runtime bin/pickle50.exe `
   --model artifacts/pickle-31m-sable-q3.pkn `
   --out results/challenge-sable-q3.json `
-  --threads 4 --kernel avx2 --iterations 5 `
+  --threads 4 --kernel avx2 --iterations 15 `
   --tokenizer D:/CodexCache/pickle-50m/sable-30m `
   --reference D:/CodexCache/pickle-50m/sable-q3-eval `
   --parity-tokens 2,417,268,283,288,430,17 `

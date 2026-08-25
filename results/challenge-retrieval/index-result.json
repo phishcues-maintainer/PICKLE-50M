@@ -5,6 +5,6 @@
   "index": "results\\challenge-retrieval\\archive.idx",
   "index_bytes": 42741,
   "identifiers": 1740,
-  "build_seconds": 0.035582,
-  "archive_mebibytes_per_second": 181.912
+  "build_seconds": 0.034843,
+  "archive_mebibytes_per_second": 185.768
 }
