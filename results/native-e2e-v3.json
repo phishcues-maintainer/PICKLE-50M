@@ -1,0 +1,30 @@
+{
+  "format": "pickle-native-end-to-end-v1",
+  "model": ".\\artifacts\\pickle-50m-native.bin",
+  "model_bytes": 15128816,
+  "kernel": "avx2",
+  "worker_threads": 4,
+  "prompt_tokens": 10,
+  "generated_tokens": 32,
+  "cold": {
+    "model_load_seconds": 0.082015,
+    "tokenization_seconds": 0.000108,
+    "state_allocation_seconds": 0.000292,
+    "prefill_seconds": 0.166196,
+    "time_to_first_token_seconds": 0.248612,
+    "decode_after_first_token_seconds": 0.446405,
+    "total_request_seconds": 0.695017
+  },
+  "warm": {
+    "iterations": 3,
+    "mean_tokenization_seconds": 0.000122,
+    "mean_state_allocation_seconds": 0.000256,
+    "mean_prefill_seconds": 0.142675,
+    "mean_time_to_first_token_seconds": 0.143053,
+    "mean_decode_after_first_token_seconds": 0.452894,
+    "mean_total_request_seconds": 0.595948,
+    "generated_tokens_per_second": 53.695984
+  },
+  "allocated_model_and_state_bytes": 15811992,
+  "generated_token_ids_last_iteration": [1116, 3, 953, 98, 1280, 410, 98, 699, 728, 3, 953, 98, 1280, 410, 98, 699, 15, 3, 953, 98, 1280, 410, 98, 699, 15, 3, 953, 98, 1280, 410, 98, 699]
+}

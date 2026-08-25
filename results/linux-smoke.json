@@ -1,0 +1,52 @@
+{
+  "format": "pickle-linux-smoke-v1",
+  "date": "2026-08-25",
+  "environment": {
+    "provider": "Google Cloud Shell",
+    "kernel": "Linux 6.6.143+ x86_64 GNU/Linux",
+    "cpu": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "sockets": 1,
+    "cores_per_socket": 2,
+    "threads_per_core": 2
+  },
+  "files": {
+    "runtime": {
+      "path": "bin/pickle50-infer-linux",
+      "bytes": 586848,
+      "sha256": "eb9bab69f8112e9379feccb223f41f1c916648d88f3e3bfff807eaa9f7f61d88"
+    },
+    "model": {
+      "path": "artifacts/pickle-50m-native.bin",
+      "bytes": 15128816,
+      "sha256": "5d0442b66bf39de8e4cd6bc12ce4ca998d9f10c3fe5d6234debb509774f1cc3c"
+    }
+  },
+  "model_info": {
+    "format": "pickle-native-model-v3",
+    "authenticated_sha256": true,
+    "authenticated_header_and_body_sha256": "45a78bcc2391b8792539adca39ae9895c17f5b355455dc30487ae03be437c99b",
+    "kernel": "avx2",
+    "worker_threads": 4,
+    "context": 4096,
+    "vocab_size": 4096
+  },
+  "generation": {
+    "prompt": "The history of computing began.",
+    "new_tokens": 16,
+    "token_ids": [1116, 3, 953, 98, 1280, 410, 98, 699, 728, 3, 953, 98, 1280, 410, 98, 699],
+    "decoded_text": " The philosophy of philosophy"
+  },
+  "benchmark": {
+    "prompt_tokens": 10,
+    "generated_tokens_per_iteration": 32,
+    "iterations": 3,
+    "cold_load_seconds": 0.108639,
+    "tokenization_seconds": 0.000144,
+    "prefill_seconds": 0.413535,
+    "time_to_first_token_seconds": 0.522318,
+    "decode_seconds": 4.006675,
+    "decode_tokens_per_second": 23.960018,
+    "timing_note": "Cloud Shell smoke measurement; not used for the same-hardware headline speed claim."
+  },
+  "result": "pass"
+}

@@ -1,0 +1,11 @@
+{
+  "format": "pickle-native-tokenizer-validation-v1",
+  "reference": "TokenMonster Python package",
+  "fixed_cases": 14,
+  "generated_corpus_characters": 46106,
+  "unicode_scalars_checked": 135955,
+  "reference_tokens_checked": 609889,
+  "exact": true,
+  "failures": [],
+  "elapsed_seconds": 4.47517
+}

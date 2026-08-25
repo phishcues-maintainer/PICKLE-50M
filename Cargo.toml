@@ -1,0 +1,29 @@
+[package]
+name = "pickle50"
+version = "0.1.0"
+edition = "2021"
+autobins = false
+license = "Apache-2.0"
+description = "Self-contained packed inference, TokenMonster, and retrieval runtime for PICKLE-50M"
+
+[dependencies]
+rayon = { version = "=1.11.0", default-features = false }
+unicode-normalization = { version = "=0.1.25", default-features = false }
+
+[build-dependencies]
+unicode-general-category = "=1.1.0"
+
+[[bin]]
+name = "pickle50"
+path = "src/main.rs"
+
+[[bin]]
+name = "pickle50-infer"
+path = "src/infer_main.rs"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

@@ -1,0 +1,10 @@
+{
+  "format": "pickle-retrieval-index-v1",
+  "archive": "D:\\CodexCache\\pickle-50m\\retrieval-adversarial-1m\\archive.txt",
+  "archive_bytes": 6787177,
+  "index": "D:\\CodexCache\\pickle-50m\\retrieval-adversarial-1m\\archive.idx",
+  "index_bytes": 42741,
+  "identifiers": 1740,
+  "build_seconds": 0.090596,
+  "archive_mebibytes_per_second": 71.446
+}

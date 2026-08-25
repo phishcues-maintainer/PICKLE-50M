@@ -1,0 +1,33 @@
+{
+  "format": "pickle-model-smoke-v1",
+  "timing_scope": "expanded FP32 reference path; not a native low-bit runtime; wall time is sensitive to host contention",
+  "artifact": "artifacts\\pickle-50m-error-guided.pklm",
+  "parameters": 49430016,
+  "threads": 4,
+  "eval_tokens": 128,
+  "source": {
+    "load_seconds": 0.061204400000860915,
+    "loss": 3.067880630493164,
+    "perplexity": 21.49629576936749,
+    "forward_seconds": 0.16902390000177547,
+    "generate_seconds": 0.34667220000119414,
+    "generated_tokens": 16,
+    "tokens_per_second": 46.153109479055104,
+    "completion": " in 1881. The following year, the econo"
+  },
+  "compressed": {
+    "load_seconds": 1.303113800000574,
+    "loss": 3.828442096710205,
+    "perplexity": 45.99083312367962,
+    "forward_seconds": 0.1186859999979788,
+    "generate_seconds": 0.33895119999942835,
+    "generated_tokens": 16,
+    "tokens_per_second": 47.2044353288231,
+    "completion": " in 1962. The following year was that of \"the origin\""
+  },
+  "drift": {
+    "loss_delta": 0.760561466217041,
+    "top1_logit_agreement": 0.6377952694892883,
+    "logit_cosine": 0.9623299241065979
+  }
+}

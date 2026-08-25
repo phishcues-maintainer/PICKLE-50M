@@ -1,0 +1,135 @@
+{
+  "format": "pickle-native-mutation-test-v1",
+  "baseline_valid": true,
+  "mutations": 18,
+  "rejected": 18,
+  "all_rejected": true,
+  "cases": [
+    {
+      "name": "truncate_0",
+      "bytes": 0,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: not a PICKLE native model v3"
+    },
+    {
+      "name": "truncate_1",
+      "bytes": 1,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: not a PICKLE native model v3"
+    },
+    {
+      "name": "truncate_7",
+      "bytes": 7,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: not a PICKLE native model v3"
+    },
+    {
+      "name": "truncate_8",
+      "bytes": 8,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: truncated native model header"
+    },
+    {
+      "name": "truncate_63",
+      "bytes": 63,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: truncated native model header"
+    },
+    {
+      "name": "truncate_64",
+      "bytes": 64,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: truncated native model header"
+    },
+    {
+      "name": "truncate_7564408",
+      "bytes": 7564408,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model body length mismatch"
+    },
+    {
+      "name": "truncate_15128815",
+      "bytes": 15128815,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model body length mismatch"
+    },
+    {
+      "name": "bit_flip_0",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: not a PICKLE native model v3"
+    },
+    {
+      "name": "bit_flip_7",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: not a PICKLE native model v3"
+    },
+    {
+      "name": "bit_flip_8",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model SHA-256 checksum mismatch"
+    },
+    {
+      "name": "bit_flip_20",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model SHA-256 checksum mismatch"
+    },
+    {
+      "name": "bit_flip_64",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model body length mismatch"
+    },
+    {
+      "name": "bit_flip_72",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model SHA-256 checksum mismatch"
+    },
+    {
+      "name": "bit_flip_96",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model SHA-256 checksum mismatch"
+    },
+    {
+      "name": "bit_flip_7564408",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model SHA-256 checksum mismatch"
+    },
+    {
+      "name": "bit_flip_15128815",
+      "bytes": 15128816,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model SHA-256 checksum mismatch"
+    },
+    {
+      "name": "trailing_byte",
+      "bytes": 15128817,
+      "rejected": true,
+      "returncode": 1,
+      "stderr": "error: native model body length mismatch"
+    }
+  ]
+}

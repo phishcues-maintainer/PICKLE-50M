@@ -1,0 +1,19 @@
+{
+    "format":  "pickle-native-memory-sample-v2",
+    "platform":  "Microsoft Windows NT 10.0.19045.0",
+    "runtime":  "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\bin\\pickle50-infer.exe",
+    "runtime_bytes":  366592,
+    "model":  "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\artifacts\\pickle-50m-native.bin",
+    "model_bytes":  15128816,
+    "kernel":  "avx2",
+    "worker_threads":  4,
+    "prompt_tokens":  9,
+    "decode_tokens_per_iteration":  64,
+    "iterations":  3,
+    "poll_interval_ms":  10,
+    "samples":  326,
+    "peak_working_set_bytes":  21712896,
+    "peak_working_set_mib":  20.70703125,
+    "decode_tokens_per_second":  43.958747,
+    "method":  "PowerShell sampled Process.WorkingSet64 and read PeakWorkingSet64"
+}

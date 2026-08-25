@@ -1,0 +1,33 @@
+{
+  "format": "pickle-model-smoke-v1",
+  "timing_scope": "expanded FP32 reference path; not a native low-bit runtime; wall time is sensitive to host contention",
+  "artifact": "artifacts\\pickle-50m-error-guided-quality.pklm",
+  "parameters": 49430016,
+  "threads": 4,
+  "eval_tokens": 128,
+  "source": {
+    "load_seconds": 0.08513719999973546,
+    "loss": 3.067880630493164,
+    "perplexity": 21.49629576936749,
+    "forward_seconds": 0.17821879999974044,
+    "generate_seconds": 0.40834499999982654,
+    "generated_tokens": 16,
+    "tokens_per_second": 39.18255396786246,
+    "completion": " in 1881. The following year, the econo"
+  },
+  "compressed": {
+    "load_seconds": 1.3783752000017557,
+    "loss": 3.7929370403289795,
+    "perplexity": 44.38657417783359,
+    "forward_seconds": 0.10086289999890141,
+    "generate_seconds": 0.3831667999984347,
+    "generated_tokens": 16,
+    "tokens_per_second": 41.75727124600921,
+    "completion": " in 1960s. The \"African\" was also"
+  },
+  "drift": {
+    "loss_delta": 0.7250564098358154,
+    "top1_logit_agreement": 0.6614173054695129,
+    "logit_cosine": 0.9627947807312012
+  }
+}

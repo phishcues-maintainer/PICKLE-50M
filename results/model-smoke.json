@@ -1,0 +1,33 @@
+{
+  "format": "pickle-model-smoke-v1",
+  "timing_scope": "expanded FP32 reference path; not a native low-bit runtime; wall time is sensitive to host contention",
+  "artifact": "artifacts\\pickle-50m-mixed-attn.pklm",
+  "parameters": 49430016,
+  "threads": 2,
+  "eval_tokens": 128,
+  "source": {
+    "load_seconds": 0.08648870000070019,
+    "loss": 3.067880868911743,
+    "perplexity": 21.496300894484392,
+    "forward_seconds": 4.231168599999364,
+    "generate_seconds": 76.31554060000053,
+    "generated_tokens": 64,
+    "tokens_per_second": 0.8386234244929079,
+    "completion": " in 1881. The following year, the economy was established in 1881. The economy was occupied by an economy of about 40,000 people. The economy"
+  },
+  "compressed": {
+    "load_seconds": 2.186133200000768,
+    "loss": 3.749760627746582,
+    "perplexity": 42.51090485095881,
+    "forward_seconds": 4.760656399999789,
+    "generate_seconds": 86.77519089999987,
+    "generated_tokens": 64,
+    "tokens_per_second": 0.7375379914030255,
+    "completion": " in the late 20th century. The late 20th century was led by \"the king\" (the \"king\"). The king's king was led by \"the king\" (the \"king\"). The king's king was led by \""
+  },
+  "drift": {
+    "loss_delta": 0.6818797588348389,
+    "top1_logit_agreement": 0.6377952694892883,
+    "logit_cosine": 0.9643200635910034
+  }
+}

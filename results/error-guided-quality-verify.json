@@ -1,0 +1,19 @@
+{
+  "valid": true,
+  "artifact": "artifacts\\pickle-50m-error-guided-quality.pklm",
+  "sha256": "b4115a5d91082adae6ea03937b5a169583242296b8180ce524c6607983964108",
+  "artifact_bytes": 15467221,
+  "artifact_mib": 14.750691413879395,
+  "parameters": 49430016,
+  "tensor_count": 138,
+  "embedded_file_count": 4,
+  "effective_artifact_bits_per_parameter": 2.503292088758377,
+  "manifest_quality": {
+    "global_cosine": 0.9708466990532503,
+    "global_nrmse": 0.2397012451722268
+  },
+  "measured_quality": {
+    "global_nrmse": 0.23970134034302934,
+    "global_cosine": 0.9708466755543579
+  }
+}

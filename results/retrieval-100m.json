@@ -1,0 +1,20 @@
+{
+  "format": "pickle-retrieval-result-v1",
+  "archive": "D:\\CodexCache\\pickle-50m\\bench\\100m\\archive.txt",
+  "archive_bytes": 678129025,
+  "index_bytes": 89509,
+  "index_entries": 3699,
+  "index_load_ms": 2.087,
+  "questions": 1000,
+  "iterations": 5,
+  "correct": 1000,
+  "accuracy": 1.000000,
+  "query_latency_us": {"mean": 9.699, "p50": 6, "p95": 19},
+  "tasks": {
+    "abstain": {"correct": 100, "total": 100, "accuracy": 1.000000},
+    "direct": {"correct": 400, "total": 400, "accuracy": 1.000000},
+    "latest_wins": {"correct": 150, "total": 150, "accuracy": 1.000000},
+    "lookalike": {"correct": 200, "total": 200, "accuracy": 1.000000},
+    "two_hop": {"correct": 150, "total": 150, "accuracy": 1.000000}
+  }
+}

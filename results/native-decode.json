@@ -1,0 +1,13 @@
+{
+  "format": "pickle-native-decode-result-v1",
+  "model": "artifacts\\pickle-50m-native.bin",
+  "model_bytes": 15326959,
+  "prompt_tokens": 9,
+  "timed_decode_tokens_per_iteration": 64,
+  "iterations": 5,
+  "total_elapsed_seconds": 12.800419,
+  "tokens_per_second": 24.999182,
+  "iteration_tokens_per_second": [26.195883, 26.187608, 25.808427, 23.754143, 23.363585],
+  "allocated_model_and_state_bytes": 16486419,
+  "generated_token_ids_last_iteration": [1755, 516, 448, 3, 2875, 17, 1116, 1755, 516, 448, 3, 2875, 1421, 3, 906, 660, 500, 1396, 3, 1482, 5, 503, 1396, 500, 3, 1482, 5, 12, 17, 1116, 3, 1482, 219, 3, 1482, 1421, 3, 906, 660, 500, 1396, 3, 1482, 5, 503, 1396, 500, 3, 1482, 5, 12, 17, 1116, 3, 1482, 219, 3, 1482, 1421, 3, 906, 660, 500, 1396]
+}

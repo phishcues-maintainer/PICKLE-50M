@@ -1,0 +1,33 @@
+{
+  "format": "pickle-model-smoke-v1",
+  "timing_scope": "expanded FP32 reference path; not a native low-bit runtime; wall time is sensitive to host contention",
+  "artifact": "artifacts\\pickle-50m-compact-refined.pklm",
+  "parameters": 49430016,
+  "threads": 4,
+  "eval_tokens": 128,
+  "source": {
+    "load_seconds": 0.061383100000966806,
+    "loss": 3.067880630493164,
+    "perplexity": 21.49629576936749,
+    "forward_seconds": 0.1446457999991253,
+    "generate_seconds": 0.43230119999861927,
+    "generated_tokens": 16,
+    "tokens_per_second": 37.011231983744445,
+    "completion": " in 1881. The following year, the econo"
+  },
+  "compressed": {
+    "load_seconds": 1.3903084000012313,
+    "loss": 3.9849765300750732,
+    "perplexity": 53.78402715599689,
+    "forward_seconds": 0.1205179999997199,
+    "generate_seconds": 0.3898659000005864,
+    "generated_tokens": 16,
+    "tokens_per_second": 41.03975238659225,
+    "completion": ". The phenome of phenome of"
+  },
+  "drift": {
+    "loss_delta": 0.9170958995819092,
+    "top1_logit_agreement": 0.5511810779571533,
+    "logit_cosine": 0.9577285647392273
+  }
+}

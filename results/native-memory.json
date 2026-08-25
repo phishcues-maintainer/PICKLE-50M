@@ -1,0 +1,14 @@
+{
+  "format": "pickle-native-memory-sample-v1",
+  "platform": "Windows 10 build 19045",
+  "runtime": "bin/pickle50.exe",
+  "model": "artifacts/pickle-50m-native.bin",
+  "prompt_tokens": 9,
+  "decode_tokens_per_iteration": 64,
+  "iterations": 5,
+  "poll_interval_ms": 50,
+  "peak_working_set_bytes": 20340736,
+  "peak_working_set_mib": 19.3984375,
+  "method": "PowerShell sampled Process.WorkingSet64 while the benchmark process was alive",
+  "note": "Use results/native-decode.json for the earlier throughput run; this memory run occurred under heavy desktop contention and is not the reported speed result."
+}

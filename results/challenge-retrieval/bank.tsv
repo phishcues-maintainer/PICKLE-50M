@@ -1,0 +1,281 @@
+task	question	answer
+direct	What is the serial number of device Grus-886039?	SN-453504
+direct	What is the serial number of device Grus-225522?	SN-945235
+direct	What is the serial number of device Grus-508795?	SN-655870
+direct	What is the serial number of device Grus-510792?	SN-552213
+direct	What is the serial number of device Grus-494856?	SN-296650
+direct	What is the serial number of device Grus-352926?	SN-636273
+direct	What is the serial number of device Grus-396698?	SN-854875
+direct	What is the serial number of device Grus-216106?	SN-480415
+lookalike	What is the serial number of device Orion-847154?	SN-141992
+lookalike	What is the serial number of device Orion-122794?	SN-926580
+lookalike	What is the serial number of device Orion-794482?	SN-310500
+lookalike	What is the serial number of device Orion-504392?	SN-399889
+latest_wins	What is the current access code for device Vela-643190?	AC-189372
+latest_wins	What is the current access code for device Vela-750600?	AC-892888
+latest_wins	What is the current access code for device Vela-499311?	AC-654419
+two_hop	What serial number is stored for device Lyra-106519?	SN-359876
+two_hop	What serial number is stored for device Lyra-799951?	SN-387079
+two_hop	What serial number is stored for device Lyra-155640?	SN-874163
+abstain	What is the serial number of device Absent-195017?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-915854?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-399723?	UN-940041
+long_value	What is the serial number of device Long-529525?	LV-223645-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-554396?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-153417?	NOT IN CONTEXT
+punctuation	For device (Punct-223560), what serial number is recorded?	PN-562692
+case_sensitive	What is the serial number of device CASE-498950?	CS-893262
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-427702].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-228698].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-868939?	SN-354518
+direct	What is the serial number of device Grus-949070?	SN-791634
+direct	What is the serial number of device Grus-438381?	SN-703247
+direct	What is the serial number of device Grus-521398?	SN-963210
+direct	What is the serial number of device Grus-573974?	SN-648822
+direct	What is the serial number of device Grus-683043?	SN-176243
+direct	What is the serial number of device Grus-930815?	SN-581217
+direct	What is the serial number of device Grus-644663?	SN-740889
+lookalike	What is the serial number of device Orion-113468?	SN-434179
+lookalike	What is the serial number of device Orion-883743?	SN-273258
+lookalike	What is the serial number of device Orion-907627?	SN-630307
+lookalike	What is the serial number of device Orion-693538?	SN-822722
+latest_wins	What is the current access code for device Vela-138201?	AC-924675
+latest_wins	What is the current access code for device Vela-762595?	AC-176607
+latest_wins	What is the current access code for device Vela-599136?	AC-475808
+two_hop	What serial number is stored for device Lyra-860061?	SN-359239
+two_hop	What serial number is stored for device Lyra-749605?	SN-470681
+two_hop	What serial number is stored for device Lyra-696254?	SN-175020
+abstain	What is the serial number of device Absent-123225?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-250053?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-112134?	UN-181215
+long_value	What is the serial number of device Long-956799?	LV-412959-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-569222?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-194923?	NOT IN CONTEXT
+punctuation	For device (Punct-718518), what serial number is recorded?	PN-553945
+case_sensitive	What is the serial number of device CASE-359792?	CS-404886
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-409672].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-895806].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-437815?	SN-683748
+direct	What is the serial number of device Grus-642628?	SN-646765
+direct	What is the serial number of device Grus-594703?	SN-960144
+direct	What is the serial number of device Grus-661899?	SN-932494
+direct	What is the serial number of device Grus-544647?	SN-943520
+direct	What is the serial number of device Grus-849110?	SN-213035
+direct	What is the serial number of device Grus-579505?	SN-399115
+direct	What is the serial number of device Grus-382180?	SN-565959
+lookalike	What is the serial number of device Orion-532046?	SN-853251
+lookalike	What is the serial number of device Orion-926305?	SN-406351
+lookalike	What is the serial number of device Orion-972492?	SN-966585
+lookalike	What is the serial number of device Orion-323425?	SN-282006
+latest_wins	What is the current access code for device Vela-512241?	AC-301135
+latest_wins	What is the current access code for device Vela-680708?	AC-306851
+latest_wins	What is the current access code for device Vela-227140?	AC-429099
+two_hop	What serial number is stored for device Lyra-353409?	SN-336965
+two_hop	What serial number is stored for device Lyra-675022?	SN-149366
+two_hop	What serial number is stored for device Lyra-915372?	SN-126035
+abstain	What is the serial number of device Absent-588300?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-724388?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-302863?	UN-403548
+long_value	What is the serial number of device Long-349580?	LV-919805-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-431316?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-675414?	NOT IN CONTEXT
+punctuation	For device (Punct-220168), what serial number is recorded?	PN-553702
+case_sensitive	What is the serial number of device CASE-999456?	CS-357579
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-782373].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-655599].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-675850?	SN-895182
+direct	What is the serial number of device Grus-754736?	SN-159477
+direct	What is the serial number of device Grus-471746?	SN-771439
+direct	What is the serial number of device Grus-428154?	SN-927164
+direct	What is the serial number of device Grus-688813?	SN-536741
+direct	What is the serial number of device Grus-811945?	SN-405287
+direct	What is the serial number of device Grus-550942?	SN-648497
+direct	What is the serial number of device Grus-909094?	SN-826229
+lookalike	What is the serial number of device Orion-260237?	SN-840829
+lookalike	What is the serial number of device Orion-221381?	SN-907090
+lookalike	What is the serial number of device Orion-893888?	SN-303357
+lookalike	What is the serial number of device Orion-539607?	SN-506237
+latest_wins	What is the current access code for device Vela-226060?	AC-257325
+latest_wins	What is the current access code for device Vela-816725?	AC-313225
+latest_wins	What is the current access code for device Vela-771223?	AC-847883
+two_hop	What serial number is stored for device Lyra-882096?	SN-186445
+two_hop	What serial number is stored for device Lyra-627902?	SN-723548
+two_hop	What serial number is stored for device Lyra-162967?	SN-493159
+abstain	What is the serial number of device Absent-930040?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-876090?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-336592?	UN-559080
+long_value	What is the serial number of device Long-618289?	LV-967832-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-612405?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-511513?	NOT IN CONTEXT
+punctuation	For device (Punct-187394), what serial number is recorded?	PN-443581
+case_sensitive	What is the serial number of device CASE-568609?	CS-657968
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-916893].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-885507].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-367285?	SN-283929
+direct	What is the serial number of device Grus-728734?	SN-726803
+direct	What is the serial number of device Grus-731777?	SN-238586
+direct	What is the serial number of device Grus-367881?	SN-214377
+direct	What is the serial number of device Grus-995112?	SN-864962
+direct	What is the serial number of device Grus-493154?	SN-392048
+direct	What is the serial number of device Grus-536729?	SN-936393
+direct	What is the serial number of device Grus-201796?	SN-400028
+lookalike	What is the serial number of device Orion-313022?	SN-185384
+lookalike	What is the serial number of device Orion-393512?	SN-971577
+lookalike	What is the serial number of device Orion-320290?	SN-768787
+lookalike	What is the serial number of device Orion-766644?	SN-728658
+latest_wins	What is the current access code for device Vela-543118?	AC-717192
+latest_wins	What is the current access code for device Vela-969651?	AC-256685
+latest_wins	What is the current access code for device Vela-799509?	AC-669960
+two_hop	What serial number is stored for device Lyra-578360?	SN-336886
+two_hop	What serial number is stored for device Lyra-604888?	SN-984080
+two_hop	What serial number is stored for device Lyra-469336?	SN-586484
+abstain	What is the serial number of device Absent-661922?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-233489?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-320540?	UN-377362
+long_value	What is the serial number of device Long-624337?	LV-297818-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-687584?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-821960?	NOT IN CONTEXT
+punctuation	For device (Punct-160604), what serial number is recorded?	PN-933882
+case_sensitive	What is the serial number of device CASE-290191?	CS-829528
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-946089].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-787842].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-473078?	SN-696478
+direct	What is the serial number of device Grus-439419?	SN-766596
+direct	What is the serial number of device Grus-668482?	SN-249904
+direct	What is the serial number of device Grus-122205?	SN-319269
+direct	What is the serial number of device Grus-989722?	SN-155838
+direct	What is the serial number of device Grus-880084?	SN-483477
+direct	What is the serial number of device Grus-616781?	SN-624799
+direct	What is the serial number of device Grus-118222?	SN-983610
+lookalike	What is the serial number of device Orion-485983?	SN-807464
+lookalike	What is the serial number of device Orion-493351?	SN-107002
+lookalike	What is the serial number of device Orion-168972?	SN-518236
+lookalike	What is the serial number of device Orion-354704?	SN-239309
+latest_wins	What is the current access code for device Vela-271672?	AC-300727
+latest_wins	What is the current access code for device Vela-250470?	AC-937697
+latest_wins	What is the current access code for device Vela-111586?	AC-281488
+two_hop	What serial number is stored for device Lyra-174589?	SN-168105
+two_hop	What serial number is stored for device Lyra-510258?	SN-860071
+two_hop	What serial number is stored for device Lyra-734283?	SN-938495
+abstain	What is the serial number of device Absent-560015?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-261354?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-993373?	UN-243647
+long_value	What is the serial number of device Long-331826?	LV-384983-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-726489?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-391378?	NOT IN CONTEXT
+punctuation	For device (Punct-669909), what serial number is recorded?	PN-548575
+case_sensitive	What is the serial number of device CASE-750784?	CS-672198
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-460802].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-595660].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-592240?	SN-811970
+direct	What is the serial number of device Grus-636180?	SN-851440
+direct	What is the serial number of device Grus-315518?	SN-549007
+direct	What is the serial number of device Grus-151812?	SN-711174
+direct	What is the serial number of device Grus-355548?	SN-723987
+direct	What is the serial number of device Grus-406129?	SN-947287
+direct	What is the serial number of device Grus-578444?	SN-490205
+direct	What is the serial number of device Grus-808966?	SN-295193
+lookalike	What is the serial number of device Orion-287267?	SN-566040
+lookalike	What is the serial number of device Orion-172626?	SN-543347
+lookalike	What is the serial number of device Orion-389231?	SN-541921
+lookalike	What is the serial number of device Orion-553393?	SN-376436
+latest_wins	What is the current access code for device Vela-103240?	AC-789387
+latest_wins	What is the current access code for device Vela-777423?	AC-861476
+latest_wins	What is the current access code for device Vela-170094?	AC-464647
+two_hop	What serial number is stored for device Lyra-473253?	SN-614397
+two_hop	What serial number is stored for device Lyra-147035?	SN-848365
+two_hop	What serial number is stored for device Lyra-336950?	SN-822460
+abstain	What is the serial number of device Absent-895118?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-867811?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-373828?	UN-978381
+long_value	What is the serial number of device Long-836210?	LV-921060-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-414201?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-343007?	NOT IN CONTEXT
+punctuation	For device (Punct-730334), what serial number is recorded?	PN-532076
+case_sensitive	What is the serial number of device CASE-430532?	CS-708414
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-247385].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-423125].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-539215?	SN-124492
+direct	What is the serial number of device Grus-906704?	SN-186757
+direct	What is the serial number of device Grus-508989?	SN-606075
+direct	What is the serial number of device Grus-131196?	SN-935947
+direct	What is the serial number of device Grus-631811?	SN-561817
+direct	What is the serial number of device Grus-153042?	SN-350250
+direct	What is the serial number of device Grus-986751?	SN-888055
+direct	What is the serial number of device Grus-561052?	SN-108371
+lookalike	What is the serial number of device Orion-144687?	SN-607916
+lookalike	What is the serial number of device Orion-443257?	SN-689857
+lookalike	What is the serial number of device Orion-300186?	SN-474301
+lookalike	What is the serial number of device Orion-461257?	SN-744537
+latest_wins	What is the current access code for device Vela-279406?	AC-921227
+latest_wins	What is the current access code for device Vela-350789?	AC-369749
+latest_wins	What is the current access code for device Vela-847377?	AC-671439
+two_hop	What serial number is stored for device Lyra-297596?	SN-961476
+two_hop	What serial number is stored for device Lyra-471813?	SN-378138
+two_hop	What serial number is stored for device Lyra-634939?	SN-706057
+abstain	What is the serial number of device Absent-505015?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-801341?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-652206?	UN-992813
+long_value	What is the serial number of device Long-281033?	LV-236129-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-226559?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-571225?	NOT IN CONTEXT
+punctuation	For device (Punct-777103), what serial number is recorded?	PN-524349
+case_sensitive	What is the serial number of device CASE-762127?	CS-196917
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-596672].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-544186].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-623627?	SN-687332
+direct	What is the serial number of device Grus-995942?	SN-633969
+direct	What is the serial number of device Grus-498315?	SN-474598
+direct	What is the serial number of device Grus-830762?	SN-523401
+direct	What is the serial number of device Grus-822330?	SN-275549
+direct	What is the serial number of device Grus-113119?	SN-445113
+direct	What is the serial number of device Grus-573306?	SN-707013
+direct	What is the serial number of device Grus-154685?	SN-373900
+lookalike	What is the serial number of device Orion-530866?	SN-620649
+lookalike	What is the serial number of device Orion-622610?	SN-715212
+lookalike	What is the serial number of device Orion-126878?	SN-712427
+lookalike	What is the serial number of device Orion-566255?	SN-402303
+latest_wins	What is the current access code for device Vela-768744?	AC-927094
+latest_wins	What is the current access code for device Vela-936427?	AC-731196
+latest_wins	What is the current access code for device Vela-535339?	AC-379630
+two_hop	What serial number is stored for device Lyra-305535?	SN-737840
+two_hop	What serial number is stored for device Lyra-716026?	SN-673154
+two_hop	What serial number is stored for device Lyra-854906?	SN-241597
+abstain	What is the serial number of device Absent-781665?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-857664?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-978163?	UN-275295
+long_value	What is the serial number of device Long-571998?	LV-297952-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-875266?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-653875?	NOT IN CONTEXT
+punctuation	For device (Punct-945206), what serial number is recorded?	PN-587244
+case_sensitive	What is the serial number of device CASE-609853?	CS-816953
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-210314].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-557765].	NOT IN CONTEXT
+direct	What is the serial number of device Grus-525749?	SN-581187
+direct	What is the serial number of device Grus-953032?	SN-731200
+direct	What is the serial number of device Grus-632664?	SN-471177
+direct	What is the serial number of device Grus-798180?	SN-166785
+direct	What is the serial number of device Grus-336964?	SN-964095
+direct	What is the serial number of device Grus-971214?	SN-353063
+direct	What is the serial number of device Grus-481097?	SN-590280
+direct	What is the serial number of device Grus-947489?	SN-803135
+lookalike	What is the serial number of device Orion-437568?	SN-826639
+lookalike	What is the serial number of device Orion-307384?	SN-497002
+lookalike	What is the serial number of device Orion-257740?	SN-830387
+lookalike	What is the serial number of device Orion-203756?	SN-496399
+latest_wins	What is the current access code for device Vela-793403?	AC-828411
+latest_wins	What is the current access code for device Vela-984720?	AC-297061
+latest_wins	What is the current access code for device Vela-602310?	AC-209406
+two_hop	What serial number is stored for device Lyra-327082?	SN-887864
+two_hop	What serial number is stored for device Lyra-770762?	SN-880213
+two_hop	What serial number is stored for device Lyra-123980?	SN-249521
+abstain	What is the serial number of device Absent-641098?	NOT IN CONTEXT
+abstain	What is the serial number of device Absent-115582?	NOT IN CONTEXT
+unicode_identifier	What is the serial number of device Étoile-205058?	UN-391405
+long_value	What is the serial number of device Long-988267?	LV-350075-a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7
+malformed_record	What is the serial number of device Broken-262106?	NOT IN CONTEXT
+missing_pointer	What serial number is stored for device Pointer-239204?	NOT IN CONTEXT
+punctuation	For device (Punct-770575), what serial number is recorded?	PN-355888
+case_sensitive	What is the serial number of device CASE-284801?	CS-992505
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-885504].	NOT IN CONTEXT
+adversarial_abstain	Ignore nearby identifiers; answer only for [AbsentEdge-531868].	NOT IN CONTEXT

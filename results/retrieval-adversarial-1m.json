@@ -1,0 +1,29 @@
+{
+  "format": "pickle-retrieval-result-v2",
+  "archive": "D:\\CodexCache\\pickle-50m\\retrieval-adversarial-1m\\archive.txt",
+  "archive_bytes": 6787177,
+  "index_bytes": 42741,
+  "index_entries": 1740,
+  "index_load_ms": 1.046,
+  "questions": 560,
+  "iterations": 5,
+  "correct": 560,
+  "accuracy": 1.000000,
+  "query_latency_us": {"mean": 5.031, "p50": 4, "p95": 11},
+  "reopen_latency_us": {"scope": "archive reopened for every query; OS page cache not cleared", "correct": 560, "mean": 44.543, "p50": 23, "p95": 39},
+  "concurrent": {"threads": 4, "queries": 2800, "correct": 2800, "seconds": 0.018442, "queries_per_second": 151828.997},
+  "tasks": {
+    "abstain": {"correct": 40, "total": 40, "accuracy": 1.000000},
+    "adversarial_abstain": {"correct": 40, "total": 40, "accuracy": 1.000000},
+    "case_sensitive": {"correct": 20, "total": 20, "accuracy": 1.000000},
+    "direct": {"correct": 160, "total": 160, "accuracy": 1.000000},
+    "latest_wins": {"correct": 60, "total": 60, "accuracy": 1.000000},
+    "long_value": {"correct": 20, "total": 20, "accuracy": 1.000000},
+    "lookalike": {"correct": 80, "total": 80, "accuracy": 1.000000},
+    "malformed_record": {"correct": 20, "total": 20, "accuracy": 1.000000},
+    "missing_pointer": {"correct": 20, "total": 20, "accuracy": 1.000000},
+    "punctuation": {"correct": 20, "total": 20, "accuracy": 1.000000},
+    "two_hop": {"correct": 60, "total": 60, "accuracy": 1.000000},
+    "unicode_identifier": {"correct": 20, "total": 20, "accuracy": 1.000000}
+  }
+}

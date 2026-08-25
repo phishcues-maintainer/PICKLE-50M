@@ -1,0 +1,19 @@
+{
+  "valid": true,
+  "artifact": "artifacts\\pickle-50m-balanced-refined.pklm",
+  "sha256": "555f267830322d8fff600c04ff8648c2518b2d4c13e43730d2f9fcf7adea968a",
+  "artifact_bytes": 15236303,
+  "artifact_mib": 14.530470848083496,
+  "parameters": 49430016,
+  "tensor_count": 138,
+  "embedded_file_count": 4,
+  "effective_artifact_bits_per_parameter": 2.465919169437453,
+  "manifest_quality": {
+    "global_cosine": 0.9698636209078629,
+    "global_nrmse": 0.24364842876400974
+  },
+  "measured_quality": {
+    "global_nrmse": 0.24364850492643736,
+    "global_cosine": 0.9698636017732581
+  }
+}

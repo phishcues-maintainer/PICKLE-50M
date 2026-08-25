@@ -1,0 +1,10 @@
+{
+  "format": "pickle-retrieval-index-v1",
+  "archive": "results\\challenge-retrieval\\archive.txt",
+  "archive_bytes": 681079,
+  "index": "results\\challenge-retrieval\\archive.idx",
+  "index_bytes": 20489,
+  "identifiers": 870,
+  "build_seconds": 0.005340,
+  "archive_mebibytes_per_second": 121.637
+}

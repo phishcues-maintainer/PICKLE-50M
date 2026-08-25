@@ -1,0 +1,67 @@
+{
+  "format": "pickle-native-validation-v1",
+  "runtime": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\bin\\pickle50.exe",
+  "native_model": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\artifacts\\pickle-50m-native.bin",
+  "reference": "D:\\CodexCache\\pickle-50m\\eval-balanced",
+  "prompt_token_ids": [
+    4068,
+    793,
+    3064,
+    728,
+    1178,
+    98,
+    1334,
+    885,
+    2079
+  ],
+  "logits": {
+    "count": 4096,
+    "reference_argmax": 704,
+    "native_argmax": 704,
+    "max_absolute_error": 1.239776611328125e-05,
+    "mean_absolute_error": 3.888686478603631e-06,
+    "rmse": 4.390752565086586e-06,
+    "cosine_similarity": 1.0
+  },
+  "greedy_generation": {
+    "tokens_checked": 16,
+    "exact_match": true,
+    "reference_token_ids": [
+      704,
+      1046,
+      28,
+      17,
+      1116,
+      3707,
+      1955,
+      15,
+      1396,
+      3,
+      319,
+      82,
+      98,
+      1303,
+      893,
+      15
+    ],
+    "native_token_ids": [
+      704,
+      1046,
+      28,
+      17,
+      1116,
+      3707,
+      1955,
+      15,
+      1396,
+      3,
+      319,
+      82,
+      98,
+      1303,
+      893,
+      15
+    ]
+  },
+  "valid": true
+}

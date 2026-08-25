@@ -1,0 +1,145 @@
+{
+  "format": "pickle-50m-summary-v4",
+  "measured_dates": ["2026-08-24", "2026-08-25"],
+  "training_performed": false,
+  "calibration_examples_used": false,
+  "base_model": "StentorLabs/Stentor3-50M",
+  "parameters": 49430016,
+  "deployment": {
+    "format": "pickle-native-model-v3",
+    "audit_artifact_bytes": 15236303,
+    "audit_artifact_sha256": "555f267830322d8fff600c04ff8648c2518b2d4c13e43730d2f9fcf7adea968a",
+    "native_model_bytes": 15128816,
+    "native_model_mib": 14.427963256835938,
+    "native_model_sha256": "5d0442b66bf39de8e4cd6bc12ce4ca998d9f10c3fe5d6234debb509774f1cc3c",
+    "authenticated_header_and_body_sha256": "45a78bcc2391b8792539adca39ae9895c17f5b355455dc30487ae03be437c99b",
+    "artifact_bits_per_parameter": 2.4485229379654663,
+    "windows_inference_runtime_bytes": 366592,
+    "windows_inference_runtime_sha256": "38093b8425585509a1f7d04f90d46ab9dab507c02f1382c389c8c21bde33769d",
+    "windows_inference_pair_bytes": 15495408,
+    "windows_inference_pair_mib": 14.777572631835938,
+    "linux_inference_runtime_bytes": 586848,
+    "linux_inference_runtime_sha256": "eb9bab69f8112e9379feccb223f41f1c916648d88f3e3bfff807eaa9f7f61d88",
+    "linux_inference_pair_bytes": 15715664,
+    "linux_inference_pair_mib": 14.987625122070312,
+    "windows_full_runtime_bytes": 453632,
+    "windows_full_runtime_sha256": "6205612a9cc7d6e9d58e3b71a68a9f0e8aa118a5e657d9d0aef72a021704dadb",
+    "linux_full_runtime_bytes": 675728,
+    "linux_full_runtime_sha256": "7bcee3b5e9c5a98a8d4943a4e98de7530ada41520a8bc34ff8368078aa582c0b",
+    "external_tokenizer_deployment_bytes": 0,
+    "native_arbitrary_text_tokenizer_included": true
+  },
+  "quantization_quality": {
+    "weights_checked": 49430016,
+    "global_nrmse": 0.24364850492643736,
+    "global_cosine": 0.9698636017732581,
+    "fixed_text_loss": 3.693211555480957,
+    "fixed_text_perplexity": 40.173659939320025,
+    "top1_logit_agreement": 0.6141732335090637,
+    "logit_cosine": 0.9659279584884644
+  },
+  "native_tokenizer_validation": {
+    "reference": "TokenMonster 1.1.12",
+    "fixed_cases": 14,
+    "generated_corpus_characters": 46106,
+    "unicode_scalars_checked": 135955,
+    "reference_tokens_checked": 609889,
+    "exact_match": true
+  },
+  "native_validation": {
+    "logits_checked": 4096,
+    "reference_argmax": 704,
+    "native_argmax": 704,
+    "max_absolute_logit_error": 0.00001239776611328125,
+    "mean_absolute_logit_error": 0.000003888686478603631,
+    "logit_cosine_similarity": 1.0,
+    "greedy_tokens_checked": 16,
+    "greedy_exact_match": true,
+    "loader_mutations_rejected": 18,
+    "loader_mutations_tested": 18
+  },
+  "native_decode_i5_7500": {
+    "timing_scope": "decode only; excludes load, prompt prefill, and tokenization",
+    "scalar_1_thread_tokens_per_second": 26.474733,
+    "avx2_1_thread_tokens_per_second": 29.624706,
+    "avx2_4_thread_tokens_per_second": 67.621644,
+    "avx2_4_thread_speedup_over_scalar": 2.554195504067973,
+    "generated_tokens_exact_across_paths": true
+  },
+  "native_end_to_end_i5_7500": {
+    "prompt_tokens": 10,
+    "generated_tokens": 32,
+    "threads": 4,
+    "kernel": "avx2",
+    "cold_model_load_seconds": 0.082015,
+    "cold_time_to_first_token_seconds": 0.248612,
+    "cold_total_request_seconds": 0.695017,
+    "warm_mean_time_to_first_token_seconds": 0.143053,
+    "warm_mean_total_request_seconds": 0.595948,
+    "warm_generated_tokens_per_second": 53.695984,
+    "peak_working_set_mib_separate_run": 20.70703125
+  },
+  "lm_eval_0_shot": {
+    "harness_version": "0.4.12",
+    "batch_size": 64,
+    "sample_limit": null,
+    "machine": "Google Compute Engine c4-highcpu-16, Intel Xeon Platinum 8581C, 16 vCPUs",
+    "result_json_sha256": "9c59d510f7d5f2250067fa6847170a27d81bb85f1b8d9b0030db3529c35ff303",
+    "total_evaluation_time_seconds": 596.10483455,
+    "piqa": {
+      "examples": 1838,
+      "accuracy": 0.5495103373231773,
+      "accuracy_stderr": 0.01160849102863819,
+      "accuracy_normalized": 0.5337323177366703,
+      "accuracy_normalized_stderr": 0.011639245522413973
+    },
+    "hellaswag": {
+      "examples": 10042,
+      "accuracy": 0.26488747261501694,
+      "accuracy_stderr": 0.004403714327379949,
+      "accuracy_normalized": 0.27235610436168095,
+      "accuracy_normalized_stderr": 0.0044426235908463325
+    },
+    "arc_easy": {
+      "examples": 2376,
+      "accuracy": 0.2668350168350168,
+      "accuracy_stderr": 0.00907591585926726,
+      "accuracy_normalized": 0.27904040404040403,
+      "accuracy_normalized_stderr": 0.009203588704032633
+    },
+    "arc_challenge": {
+      "examples": 1172,
+      "accuracy": 0.19965870307167236,
+      "accuracy_stderr": 0.011681625756888666,
+      "accuracy_normalized": 0.23976109215017063,
+      "accuracy_normalized_stderr": 0.012476304127453926
+    }
+  },
+  "retrieval_adversarial_1m": {
+    "archive_bytes": 6787177,
+    "questions": 560,
+    "task_types": 12,
+    "accuracy": 1.0,
+    "index_bytes": 42741,
+    "index_entries": 1740,
+    "index_build_seconds": 0.090596,
+    "loaded_query_latency_us": {"mean": 5.031, "p50": 4, "p95": 11},
+    "reopen_query_latency_us": {
+      "scope": "archive reopened for every query; OS page cache not cleared",
+      "mean": 44.543,
+      "p50": 23,
+      "p95": 39
+    },
+    "concurrent_threads": 4,
+    "concurrent_queries_per_second": 151828.997,
+    "concurrent_correct": 2800,
+    "concurrent_queries": 2800
+  },
+  "claim_boundary": {
+    "retrieval_is_model_context": false,
+    "native_packed_generation_implemented": true,
+    "expanded_fp32_speed_is_comparable_to_native_low_bit": false,
+    "same_hardware_winner_declared": false,
+    "linux_binary_executed_on_host": false
+  }
+}

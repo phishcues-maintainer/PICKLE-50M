@@ -1,0 +1,67 @@
+{
+  "format": "pickle-native-validation-v1",
+  "runtime": "bin\\pickle50.exe",
+  "native_model": "artifacts\\pickle-50m-native.bin",
+  "reference": "D:\\CodexCache\\pickle-50m\\eval-hf",
+  "prompt_token_ids": [
+    4068,
+    793,
+    3064,
+    728,
+    1178,
+    98,
+    1334,
+    885,
+    2079
+  ],
+  "logits": {
+    "count": 4096,
+    "reference_argmax": 2659,
+    "native_argmax": 2659,
+    "max_absolute_error": 1.1444091796875e-05,
+    "mean_absolute_error": 3.179842678946443e-06,
+    "rmse": 3.7303691442502895e-06,
+    "cosine_similarity": 1.0000001059152501
+  },
+  "greedy_generation": {
+    "tokens_checked": 16,
+    "exact_match": true,
+    "reference_token_ids": [
+      2659,
+      1755,
+      516,
+      448,
+      3,
+      2875,
+      17,
+      1116,
+      1755,
+      516,
+      448,
+      3,
+      2875,
+      1421,
+      3,
+      906
+    ],
+    "native_token_ids": [
+      2659,
+      1755,
+      516,
+      448,
+      3,
+      2875,
+      17,
+      1116,
+      1755,
+      516,
+      448,
+      3,
+      2875,
+      1421,
+      3,
+      906
+    ]
+  },
+  "valid": true
+}
