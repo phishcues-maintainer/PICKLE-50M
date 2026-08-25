@@ -1,6 +1,3 @@
-* text=auto eol=lf
-
-*.bin binary
-*.exe binary
-*.pklm binary
-*.gz binary
+# These machine-generated benchmark files are also published release assets.
+# Preserve their exact bytes so CHECKSUMS.sha256 is stable on every checkout.
+results/**/*.json -text
