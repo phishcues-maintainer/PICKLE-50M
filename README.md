@@ -25,13 +25,15 @@ Retrieval is reported as a separate system, never as model context.
 packed Q3 weights, FP16 group scales, dimensions, special-token metadata, and complete compact
 byte-level BPE tokenizer.
 
-| Windows deployment | Model bytes | Runtime bytes | Combined bytes | Combined MiB |
+| Deployment | Model bytes | Runtime bytes | Combined bytes | Combined MiB |
 |---|---:|---:|---:|---:|
-| Inference-only | 12,534,009 | 384,512 | 12,918,521 | 12.3201 |
-| Full utility, including retrieval tools | 12,534,009 | 471,552 | 13,005,561 | 12.4031 |
+| Windows inference-only | 12,534,009 | 384,512 | 12,918,521 | 12.3201 |
+| Windows full utility | 12,534,009 | 471,552 | 13,005,561 | 12.4031 |
+| Linux inference-only | 12,534,009 | 581,088 | 13,115,097 | 12.5075 |
+| Linux full utility | 12,534,009 | 669,608 | 13,203,617 | 12.5920 |
 
-The model itself is 11.9534 MiB. The inference pair is 2,810,119 bytes below 15 MiB. Linux
-release sizes and a real Linux smoke run are recorded in [RESULTS.md](RESULTS.md).
+The model itself is 11.9534 MiB. Both inference pairs have more than 2.6 MB of margin below
+15 MiB. A native Linux build and real Linux smoke run are recorded in [RESULTS.md](RESULTS.md).
 
 The V4 loader authenticates its header and body before parsing. Any tested truncation, bit
 mutation, or trailing byte is rejected.

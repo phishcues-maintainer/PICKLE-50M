@@ -1,6 +1,7 @@
-//! Self-contained TokenMonster encoder/decoder for the vocabulary embedded in
-//! the native model. The ungreedy branch scoring follows TokenMonster's MIT
-//! licensed Go implementation.
+//! Self-contained tokenizer dispatch for vocabularies embedded in native
+//! models. Supports compact byte-level BPE and the legacy TokenMonster format.
+//! TokenMonster's ungreedy branch scoring follows its MIT-licensed Go
+//! implementation.
 
 use std::collections::HashMap;
 use std::io;

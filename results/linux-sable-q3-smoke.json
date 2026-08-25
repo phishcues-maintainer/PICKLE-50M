@@ -1,0 +1,61 @@
+{
+  "format": "pickle-linux-release-smoke-v1",
+  "commit": "b8b1cb9d9c1b2394a6c1878aa587c1454113aee0",
+  "machine": {
+    "provider": "Google Cloud",
+    "instance_type": "c4-highcpu-16",
+    "zone": "us-central1-b",
+    "os": "Debian 12",
+    "kernel": "Linux 6.1.0-52-cloud-amd64 x86_64",
+    "logical_cpus": 16,
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8581C CPU @ 2.30GHz",
+    "rustc": "1.97.0"
+  },
+  "tests": {
+    "cargo_release": {
+      "passed": 11,
+      "failed": 0
+    },
+    "model_authenticated": true,
+    "model_format": "pickle-native-model-v4",
+    "native_tokenizer": "byte-level-bpe",
+    "kernel": "avx2",
+    "worker_threads": 4,
+    "arbitrary_text_generation": {
+      "prompt": "The history of computing began.",
+      "token_ids": [310, 677, 354, 211, 677, 493, 239, 258],
+      "text": " The first was the first one to be"
+    },
+    "inference_benchmark": {
+      "format": "pickle-inference-benchmark-v1",
+      "prompt_tokens": 6,
+      "generated_tokens_per_iteration": 32,
+      "iterations": 15,
+      "cold_load_seconds": 0.055973,
+      "tokenization_seconds": 0.000006,
+      "prefill_seconds": 0.033053,
+      "time_to_first_token_seconds": 0.089031,
+      "decode_seconds": 2.664038,
+      "decode_tokens_per_second": 180.177604
+    }
+  },
+  "artifacts": {
+    "model": {
+      "path": "artifacts/pickle-31m-sable-q3.pkn",
+      "bytes": 12534009,
+      "sha256": "ef082637bd79dfa4d8e216003a71ce4fa11245f27d37e8c38bc0d1593f023140"
+    },
+    "full_runtime": {
+      "path": "bin/pickle50-linux",
+      "bytes": 669608,
+      "sha256": "6a42e4059825870fb48a435ff26406f87b160bd9fe81c31482c778190470be4d"
+    },
+    "inference_runtime": {
+      "path": "bin/pickle50-infer-linux",
+      "bytes": 581088,
+      "sha256": "6cc0d05a3586e3aea74bd41cc740396d48c492448a8fb96744f88b4a56a12b9c"
+    },
+    "inference_pair_bytes": 13115097,
+    "inference_pair_mib": 12.5075311660767
+  }
+}

@@ -1,8 +1,8 @@
 {
   "format": "pickle-public-retrieval-v1",
   "token_definition": "whitespace",
-  "tokens": 100000,
-  "questions": 280,
+  "tokens": 1000000,
+  "questions": 560,
   "seed": 20260824,
-  "archive_bytes": 681079
+  "archive_bytes": 6787177
 }

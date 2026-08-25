@@ -1,0 +1,418 @@
+{
+  "format": "pickle-challenge-result-v1",
+  "artifacts": {
+    "model": {
+      "path": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\artifacts\\pickle-31m-sable-q3.pkn",
+      "bytes": 12534009,
+      "sha256": "ef082637bd79dfa4d8e216003a71ce4fa11245f27d37e8c38bc0d1593f023140"
+    },
+    "runtime": {
+      "path": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\bin\\pickle50.exe",
+      "bytes": 471552,
+      "sha256": "c117ad6e29740d0e30165a33c8a85a231aa73f4a71dc90136114062fa5331f9f"
+    },
+    "combined_bytes": 13005561,
+    "combined_mib": 12.403069496154785
+  },
+  "model_info": {
+    "format": "pickle-native-model-v4",
+    "authenticated_sha256": true,
+    "authenticated_header_and_body_sha256": "18670c7927173f8ff5d1110b4e5c2b7083c92c5318160ce782a7ba26a1a93433",
+    "native_tokenizer": "byte-level-bpe",
+    "tied_embeddings": true,
+    "default_add_bos": false,
+    "kernel": "avx2",
+    "worker_threads": 4,
+    "model_bytes": 12534009,
+    "layers": 8,
+    "hidden_size": 512,
+    "intermediate_size": 1024,
+    "vocab_size": 24000,
+    "attention_heads": 8,
+    "kv_heads": 4,
+    "head_dim": 64,
+    "context": 1024,
+    "group_size": 128,
+    "bos_token_id": 2,
+    "eos_token_id": 3,
+    "pad_token_id": 0
+  },
+  "decode_benchmark": {
+    "format": "pickle-native-decode-result-v2",
+    "model": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\artifacts\\pickle-31m-sable-q3.pkn",
+    "model_bytes": 12534009,
+    "kernel": "avx2",
+    "worker_threads": 4,
+    "prompt_tokens": 6,
+    "timed_decode_tokens_per_iteration": 32,
+    "iterations": 5,
+    "total_elapsed_seconds": 3.195979,
+    "tokens_per_second": 50.062902,
+    "iteration_tokens_per_second": [
+      17.315883,
+      97.853671,
+      99.125251,
+      96.014008,
+      87.710282
+    ],
+    "allocated_model_and_state_bytes": 13271185,
+    "generated_token_ids_last_iteration": [
+      677,
+      354,
+      211,
+      677,
+      493,
+      239,
+      258,
+      211,
+      677,
+      239,
+      258,
+      211,
+      677,
+      239,
+      258,
+      211,
+      677,
+      239,
+      258,
+      211,
+      677,
+      239,
+      258,
+      211,
+      677,
+      239,
+      258,
+      211,
+      677,
+      239,
+      258,
+      211
+    ]
+  },
+  "tokenizer_parity": {
+    "format": "pickle-native-tokenizer-validation-v1",
+    "reference": "Transformers fast tokenizer",
+    "fixed_cases": 14,
+    "generated_corpus_characters": 46106,
+    "unicode_scalars_checked": 135955,
+    "reference_tokens_checked": 663409,
+    "exact": true,
+    "failures": [],
+    "elapsed_seconds": 3.378999,
+    "runner_wall_seconds": 10.964421600001515
+  },
+  "native_parity": {
+    "format": "pickle-native-validation-v1",
+    "runtime": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\bin\\pickle50.exe",
+    "native_model": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\artifacts\\pickle-31m-sable-q3.pkn",
+    "reference": "D:\\CodexCache\\pickle-50m\\sable-q3-eval",
+    "prompt_token_ids": [
+      2,
+      417,
+      268,
+      283,
+      288,
+      430,
+      17
+    ],
+    "logits": {
+      "count": 24000,
+      "reference_argmax": 17397,
+      "native_argmax": 17397,
+      "max_absolute_error": 1.52587890625e-05,
+      "mean_absolute_error": 2.770761739157024e-06,
+      "rmse": 3.5092800771963084e-06,
+      "cosine_similarity": 1.0000000850803374
+    },
+    "greedy_generation": {
+      "tokens_checked": 16,
+      "exact_match": true,
+      "reference_token_ids": [
+        17397,
+        315,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83
+      ],
+      "native_token_ids": [
+        17397,
+        315,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83,
+        17,
+        83
+      ]
+    },
+    "valid": true,
+    "runner_wall_seconds": 21.326708900000085
+  },
+  "loader_mutation_test": {
+    "format": "pickle-native-mutation-test-v1",
+    "baseline_valid": true,
+    "mutations": 18,
+    "rejected": 18,
+    "all_rejected": true,
+    "cases": [
+      {
+        "name": "truncate_0",
+        "bytes": 0,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: not a supported PICKLE native model"
+      },
+      {
+        "name": "truncate_1",
+        "bytes": 1,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: not a supported PICKLE native model"
+      },
+      {
+        "name": "truncate_7",
+        "bytes": 7,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: not a supported PICKLE native model"
+      },
+      {
+        "name": "truncate_8",
+        "bytes": 8,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: truncated native model header"
+      },
+      {
+        "name": "truncate_63",
+        "bytes": 63,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: truncated native model header"
+      },
+      {
+        "name": "truncate_64",
+        "bytes": 64,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: truncated native model header"
+      },
+      {
+        "name": "truncate_6267004",
+        "bytes": 6267004,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model body length mismatch"
+      },
+      {
+        "name": "truncate_12534008",
+        "bytes": 12534008,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model body length mismatch"
+      },
+      {
+        "name": "bit_flip_0",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: not a supported PICKLE native model"
+      },
+      {
+        "name": "bit_flip_7",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: not a supported PICKLE native model"
+      },
+      {
+        "name": "bit_flip_8",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model SHA-256 checksum mismatch"
+      },
+      {
+        "name": "bit_flip_20",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model SHA-256 checksum mismatch"
+      },
+      {
+        "name": "bit_flip_64",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model uses unsupported feature flags"
+      },
+      {
+        "name": "bit_flip_72",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model body length mismatch"
+      },
+      {
+        "name": "bit_flip_96",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model SHA-256 checksum mismatch"
+      },
+      {
+        "name": "bit_flip_6267004",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model SHA-256 checksum mismatch"
+      },
+      {
+        "name": "bit_flip_12534008",
+        "bytes": 12534009,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model SHA-256 checksum mismatch"
+      },
+      {
+        "name": "trailing_byte",
+        "bytes": 12534010,
+        "rejected": true,
+        "returncode": 1,
+        "stderr": "error: native model body length mismatch"
+      }
+    ]
+  },
+  "retrieval": {
+    "index": {
+      "format": "pickle-retrieval-index-v1",
+      "archive": "results\\challenge-retrieval\\archive.txt",
+      "archive_bytes": 6787177,
+      "index": "results\\challenge-retrieval\\archive.idx",
+      "index_bytes": 42741,
+      "identifiers": 1740,
+      "build_seconds": 0.035582,
+      "archive_mebibytes_per_second": 181.912
+    },
+    "benchmark": {
+      "format": "pickle-retrieval-result-v2",
+      "archive": "results\\challenge-retrieval\\archive.txt",
+      "archive_bytes": 6787177,
+      "index_bytes": 42741,
+      "index_entries": 1740,
+      "index_load_ms": 1.146,
+      "questions": 560,
+      "iterations": 5,
+      "correct": 560,
+      "accuracy": 1.0,
+      "query_latency_us": {
+        "mean": 5.639,
+        "p50": 5,
+        "p95": 13
+      },
+      "reopen_latency_us": {
+        "scope": "archive reopened for every query; OS page cache not cleared",
+        "correct": 560,
+        "mean": 34.811,
+        "p50": 31,
+        "p95": 59
+      },
+      "concurrent": {
+        "threads": 4,
+        "queries": 2800,
+        "correct": 2800,
+        "seconds": 0.011765,
+        "queries_per_second": 237990.004
+      },
+      "tasks": {
+        "abstain": {
+          "correct": 40,
+          "total": 40,
+          "accuracy": 1.0
+        },
+        "adversarial_abstain": {
+          "correct": 40,
+          "total": 40,
+          "accuracy": 1.0
+        },
+        "case_sensitive": {
+          "correct": 20,
+          "total": 20,
+          "accuracy": 1.0
+        },
+        "direct": {
+          "correct": 160,
+          "total": 160,
+          "accuracy": 1.0
+        },
+        "latest_wins": {
+          "correct": 60,
+          "total": 60,
+          "accuracy": 1.0
+        },
+        "long_value": {
+          "correct": 20,
+          "total": 20,
+          "accuracy": 1.0
+        },
+        "lookalike": {
+          "correct": 80,
+          "total": 80,
+          "accuracy": 1.0
+        },
+        "malformed_record": {
+          "correct": 20,
+          "total": 20,
+          "accuracy": 1.0
+        },
+        "missing_pointer": {
+          "correct": 20,
+          "total": 20,
+          "accuracy": 1.0
+        },
+        "punctuation": {
+          "correct": 20,
+          "total": 20,
+          "accuracy": 1.0
+        },
+        "two_hop": {
+          "correct": 60,
+          "total": 60,
+          "accuracy": 1.0
+        },
+        "unicode_identifier": {
+          "correct": 20,
+          "total": 20,
+          "accuracy": 1.0
+        }
+      }
+    }
+  },
+  "lm_eval": null,
+  "orchestration_wall_seconds": {
+    "model_info": 0.9273893999925349,
+    "decode_benchmark": 5.449596499995096,
+    "loader_mutation_test": 1.1779033999919193
+  }
+}

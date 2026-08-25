@@ -1,0 +1,15 @@
+{
+  "format": "pickle-native-decode-result-v2",
+  "model": "artifacts\\pickle-31m-sable-q3.pkn",
+  "model_bytes": 12534009,
+  "kernel": "avx2",
+  "worker_threads": 4,
+  "prompt_tokens": 12,
+  "timed_decode_tokens_per_iteration": 32,
+  "iterations": 5,
+  "total_elapsed_seconds": 1.564342,
+  "tokens_per_second": 102.279431,
+  "iteration_tokens_per_second": [102.228812, 101.578530, 102.822907, 103.734574, 101.074836],
+  "allocated_model_and_state_bytes": 13369513,
+  "generated_token_ids_last_iteration": [20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17, 20, 17]
+}

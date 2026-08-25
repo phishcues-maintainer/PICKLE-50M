@@ -361,16 +361,16 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument(
         "--base-model",
-        default="StentorLabs/Stentor3-50M",
+        required=True,
         help="public source model identifier",
     )
     parser.add_argument(
-        "--base-revision", default="main", help="immutable public source revision"
+        "--base-revision", required=True, help="immutable public source revision"
     )
-    parser.add_argument("--license", default="Apache-2.0")
-    parser.add_argument("--group-size", type=int, default=256)
-    parser.add_argument("--refinement-rounds", type=int, default=6)
-    parser.add_argument("--quant-bits", type=int, choices=(2, 3), default=2)
+    parser.add_argument("--license", required=True)
+    parser.add_argument("--group-size", type=int, default=128)
+    parser.add_argument("--refinement-rounds", type=int, default=8)
+    parser.add_argument("--quant-bits", type=int, choices=(2, 3), default=3)
     parser.add_argument(
         "--q2-method",
         choices=("fixed", "symmetric"),

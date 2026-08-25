@@ -1,186 +1,211 @@
-# PICKLE-50M results
+# PICKLE-50M v1.1 results
 
-Measured on 2026-08-24 and 2026-08-25. These results make a future same-hardware comparison
-possible; they do not declare a winner before the other 50M entry and its harness are public.
+Measured on 2026-08-25. These results make a future same-hardware comparison possible; they do
+not declare a winner before the other entry and its harness are public.
 
 ## Scope and claim boundary
 
-- No training, fine-tuning, distillation, or calibration examples were used.
-- The language model is the public pretrained `StentorLabs/Stentor3-50M` checkpoint. This project
-  contributes deterministic post-training compression, native packaging, inference, and tests.
-- Retrieval is a separate lookup-and-extraction system. It is not model context, and retrieval
-  accuracy is not attributed to the language model.
-- Standard model scores use weights reconstructed from the selected deployment artifact.
-- Native decode numbers use the packed Q2/Q4 bytes directly. Decode-only and end-to-end timings
-  are reported separately.
-- Arbitrary-text TokenMonster encoding and decoding are native. The Python reference tokenizer is
-  used only for parity validation.
+- This project performed no training, fine-tuning, distillation, gradient updates, or
+  example-based calibration.
+- The model is the public pretrained `SEN-AGI/Sable-1.1-30M` checkpoint at immutable revision
+  `1a845020ed104bd38b67b2a95472fb166cd4a99b`. The project contributes deterministic
+  weight-only compression, native packaging, inference, and tests.
+- The upstream checkpoint is a 31.2M-parameter preview base model, not an instruct model.
+- Standard scores use the exact Q3 values reconstructed from the selected deployment artifact.
+- Native decode uses those same packed Q3 bytes directly.
+- Retrieval is a separate deterministic lookup-and-extraction system. It is not model context,
+  and its accuracy is not attributed to the language model.
+- Speed results below use stated timing boundaries and are not a same-hardware comparison with
+  another entrant.
 
 ## Test machines
 
-Native Windows measurements:
+Windows native measurements:
 
 - Windows 10 build 19045
 - Intel Core i5-7500, 4 cores / 4 threads, 3.40 GHz
 - 32 GiB RAM
 - Rust/Cargo 1.97.0
 
-The four standard accuracy tasks were accelerated on a temporary Google Cloud
-`c4-highcpu-16` in `us-central1-b`: 16 vCPUs, 32 GiB RAM, Debian 12, Python 3.11,
-PyTorch 2.8.0 CPU, Transformers 4.52.3, and lm-evaluation-harness 0.4.12. Hardware affects
-evaluation time, not deterministic accuracy. It is not used for a same-hardware speed claim.
+Standard accuracy and Linux release validation:
 
-The Linux binaries were cross-compiled with the official Zig 0.14.1 toolchain. The inference-only
-binary was then executed in Google Cloud Shell on Linux 6.6.143+ x86_64 with an Intel Xeon 2.20
-GHz allocation (2 cores / 4 threads). Its uploaded hashes matched, the authenticated V3 model
-loaded with the AVX2 kernel, arbitrary-text generation completed, and a 3-iteration benchmark
-completed. This Cloud Shell timing is a portability smoke measurement, not the same-hardware
-headline speed claim. Evidence is in `results/linux-smoke.json`.
+- Google Cloud `c4-highcpu-16`, `us-central1-b`
+- Intel Xeon Platinum 8581C, 8 cores / 16 threads, 2.30 GHz
+- 32 GiB RAM, Debian 12, Linux 6.1.0-52-cloud-amd64
+- PyTorch 2.8.0+cpu, Transformers 4.52.3, lm-evaluation-harness 0.4.12
+- no CUDA build and no GPU attached
+
+Hardware affects evaluation duration, not deterministic accuracy.
 
 ## Deployment size and integrity
 
-The same authenticated model file is used on both operating systems.
+The same authenticated model file is used on Windows and Linux.
 
 | Component or pair | Bytes | MiB | Margin below 15 MiB |
 |---|---:|---:|---:|
-| Native model plus compact TokenMonster vocabulary | 15,128,816 | 14.4280 | — |
-| Windows inference-only runtime | 366,592 | 0.3496 | — |
-| Windows inference-only pair | 15,495,408 | 14.7776 | 233,232 bytes |
-| Linux inference-only runtime | 586,848 | 0.5597 | — |
-| Linux inference-only pair | 15,715,664 | 14.9876 | 12,976 bytes |
-| Windows full utility pair | 15,582,448 | 14.8606 | 146,192 bytes |
-| Linux full utility pair | 15,804,544 | 15.0724 | over by 75,904 bytes |
-| Audited PKLM source artifact | 15,236,303 | 14.5305 | — |
+| Native V4 model including compact BPE tokenizer | 12,534,009 | 11.9534 | — |
+| Windows inference-only runtime | 384,512 | 0.3667 | — |
+| Windows inference-only pair | 12,918,521 | 12.3201 | 2,810,119 bytes |
+| Windows full utility pair | 13,005,561 | 12.4031 | 2,723,079 bytes |
+| Linux inference-only runtime | 581,088 | 0.5542 | — |
+| Linux inference-only pair | 13,115,097 | 12.5075 | 2,613,543 bytes |
+| Linux full utility pair | 13,203,617 | 12.5920 | 2,525,023 bytes |
+| Audited PKLM source artifact | 13,892,464 | 13.2489 | — |
 
-The model occupies 2.44852 artifact bits per source parameter, including FP16 scales, the V3
-header, integrity metadata, and tokenizer data. The audited PKLM artifact occupies 2.46592 bits per
-parameter and records the base model, source hash, selected tensor kinds, and
-`training_performed: false`.
+The deployment model occupies 3.21683 all-in bits per source parameter, including FP16 scales,
+header, integrity metadata, and the 343,615-byte compact tokenizer. The audited PKLM occupies
+3.56548 bits per parameter and records `training_performed: false`.
 
 | Artifact | SHA-256 |
 |---|---|
-| Audited PKLM | `555f267830322d8fff600c04ff8648c2518b2d4c13e43730d2f9fcf7adea968a` |
-| Native model | `5d0442b66bf39de8e4cd6bc12ce4ca998d9f10c3fe5d6234debb509774f1cc3c` |
-| Windows inference-only runtime | `38093b8425585509a1f7d04f90d46ab9dab507c02f1382c389c8c21bde33769d` |
-| Linux inference-only runtime | `eb9bab69f8112e9379feccb223f41f1c916648d88f3e3bfff807eaa9f7f61d88` |
-| Windows full utility runtime | `6205612a9cc7d6e9d58e3b71a68a9f0e8aa118a5e657d9d0aef72a021704dadb` |
-| Linux full utility runtime | `7bcee3b5e9c5a98a8d4943a4e98de7530ada41520a8bc34ff8368078aa582c0b` |
+| Audited PKLM | `b27d636d5b8b725cbd6188d1cfeb9a71da6c73e03454f6ca6d8b233c73952fef` |
+| Native model | `ef082637bd79dfa4d8e216003a71ce4fa11245f27d37e8c38bc0d1593f023140` |
+| Windows inference runtime | `178eeb8b2a5b5f9d4b92dc16c68ca4e6caa8069b18d235d571baf49a09e2494d` |
+| Windows full utility | `c117ad6e29740d0e30165a33c8a85a231aa73f4a71dc90136114062fa5331f9f` |
+| Linux inference runtime | `6cc0d05a3586e3aea74bd41cc740396d48c492448a8fb96744f88b4a56a12b9c` |
+| Linux full utility | `6a42e4059825870fb48a435ff26406f87b160bd9fe81c31482c778190470be4d` |
 
-Native format V3 authenticates dimensions, tensor-kind metadata, all packed weights and scales,
-and tokenizer data before parsing. A deterministic mutation suite tested empty and partial files,
-eight truncation points, nine header/body bit flips, and a trailing byte. All 18/18 corruptions
-were rejected. The authenticated header/body digest reported by the loader is
-`45a78bcc2391b8792539adca39ae9895c17f5b355455dc30487ae03be437c99b`.
+The authenticated header/body digest reported by the loader is
+`18670c7927173f8ff5d1110b4e5c2b7083c92c5318160ce782a7ba26a1a93433`. A deterministic
+suite tested empty and partial files, eight truncations, nine header/body bit flips, and a
+trailing byte. All 18/18 malformed files were rejected.
 
-## Native tokenizer validation
+## Native arbitrary-text tokenizer
 
-The native encoder was compared token-for-token with TokenMonster 1.1.12. The test covers 14 fixed
-cases, a deterministic 46,106-character mixed-script/adversarial corpus, and all 135,955 Unicode
-letter, number, and mark scalars recognized by the validation environment.
+V1.1 removes the external-tokenizer limitation. The native runtime embeds the complete byte-level
+BPE vocabulary, byte mapping, merge ranks, added tokens, and special-token metadata. `--prompt`
+and `--prompt-file` need no Python or tokenizer service.
+
+The encoder was compared token-for-token with the Transformers fast tokenizer over 14 fixed
+cases, a deterministic 46,106-character mixed/adversarial corpus, and all 135,955 Unicode letter,
+number, and mark scalars recognized by the test environment.
 
 | Check | Result |
 |---|---:|
-| Reference token IDs compared | 609,889 |
+| Reference token IDs compared | 663,409 |
 | Token-ID differences | 0 |
 | Exact match | Yes |
 
-`--prompt` and `--prompt-file` now use this native path. Python and the TokenMonster server are not
-deployment dependencies. Raw evidence is in `results/native-tokenizer-validation.json`.
+Raw evidence: `results/sable-tokenizer-validation.json`.
 
 ## Quantization quality
 
-The selected artifact performs six deterministic code/scale refinement rounds, then fits the
-Linux 15 MiB pair by returning the ten lowest reconstruction-benefit attention tensors to Q2.
-Selection uses weights only, never text or calibration examples.
+The selected artifact uses a fixed symmetric eight-level Q3 codebook, 128-weight groups, FP16
+scales, and eight deterministic scale/code refinement rounds. Selection reads weights only.
 
-Across all 49,430,016 weights:
+Across all 31,171,072 parameters:
 
-| Check | Selected artifact | Earlier mixed-attention artifact |
-|---|---:|---:|
-| Global cosine similarity | 0.969864 | 0.969548 |
-| Global normalized RMSE | 0.243649 | 0.244902 |
-| Fixed-text compressed loss | 3.693212 | 3.749761 |
-| Fixed-text perplexity | 40.1737 | 42.5109 |
-| Logit cosine similarity | 0.965928 | 0.964320 |
-| Top-1 logit agreement | 61.42% | 63.78% |
+| Check | Result |
+|---|---:|
+| Global cosine similarity | 0.9866457325 |
+| Global normalized RMSE | 0.1628809338 |
+| PKLM manifest/measured agreement | exact to displayed precision |
 
-The selected artifact improves reconstruction, loss, perplexity, and logit cosine while making the
-native model 212,814 bytes smaller than the earlier version. Top-1 agreement on this small smoke
-sample regressed, so it is disclosed rather than hidden. This fixed 128-token sample is a drift
-test, not a standard benchmark. Evidence is in `results/balanced-refined-verify.json` and
-`results/balanced-refined-smoke.json`.
+Raw evidence: `results/sable-q3-integrity.json`.
 
-## Native inference parity and performance
+## Native inference parity
 
-Against the exact quantized values expanded into the Hugging Face Llama reference:
+Against the exact Q3 values expanded into the Hugging Face Llama reference:
 
 | Native parity check | Result |
 |---|---:|
-| Last-token logits checked | 4,096 |
-| Reference/native argmax | 704 / 704 |
-| Maximum absolute logit error | 0.0000123978 |
-| Mean absolute logit error | 0.0000038887 |
-| Logit cosine similarity | 1.000000 |
-| Greedy generation | Exact, 16/16 token IDs |
+| Last-token logits checked | 24,000 |
+| Reference/native argmax | 17,397 / 17,397 |
+| Maximum absolute logit error | 0.0000152588 |
+| Mean absolute logit error | 0.0000027708 |
+| RMSE | 0.0000035093 |
+| Logit cosine similarity | 1.000000085 |
+| Greedy generation | exact, 16/16 token IDs |
 
-The AVX2 path was tested against the scalar path with identical generated IDs:
+Raw evidence: `results/sable-q3-native-parity.json`.
 
-| Packed decode path | Threads | Speed | Relative to scalar |
+## Native CPU performance
+
+Decode-only timing excludes load, tokenization, and prompt prefill. The stable profile uses a
+fixed seven-token prompt, 32 timed decode tokens, and 15 iterations:
+
+| Packed path | Threads | Speed | Relative to scalar |
 |---|---:|---:|---:|
-| Scalar | 1 | 26.475 tok/s | 1.000x |
-| AVX2 | 1 | 29.625 tok/s | 1.119x |
-| AVX2 plus persistent workers | 4 | 67.622 tok/s | 2.554x |
+| Scalar | 1 | 25.686 tok/s | 1.000x |
+| AVX2 | 1 | 44.550 tok/s | 1.734x |
+| AVX2 plus persistent workers | 4 | 111.460 tok/s | 4.339x |
 
-Decode-only timing excludes load, prompt tokenization, and prefill. The separate full request test
-uses an arbitrary text prompt, 32 generated tokens, AVX2, and four workers:
+All paths generated identical IDs. The separate one-command challenge run uses an arbitrary text
+prompt and five iterations; one slow iteration reduced its aggregate to 98.790 tok/s. Both values
+are retained rather than choosing only the favorable run.
 
-| End-to-end stage | Cold | Warm mean |
-|---|---:|---:|
-| Model load | 82.015 ms | already loaded |
-| Tokenization | 0.108 ms | 0.122 ms |
-| State allocation | 0.292 ms | 0.256 ms |
-| Prompt prefill | 166.196 ms | 142.675 ms |
-| Time to first token | 248.612 ms | 143.053 ms |
-| Total request | 695.017 ms | 595.948 ms |
-| Generated-token rate | — | 53.696 tok/s |
+A separately sampled full-utility process peaked at 18.102 MiB working set while decoding at
+94.496 tok/s. Raw evidence: `results/kernel-profile-sable-q3.json`,
+`results/challenge-sable-q3.json`, and `results/sable-q3-native-memory.json`.
 
-A separately sampled inference-only run peaked at 20.707 MiB working set. Its speed sample was
-taken while the host was busy and is not used as the headline throughput number. Raw evidence is
-in `results/native-parity.json`, `results/kernel-profile-v3.json`,
-`results/native-e2e-v3.json`, and `results/native-memory-v3.json`.
+## Real Linux release validation
 
-The published Linux inference pair also passed a real Linux smoke test. On Google Cloud Shell,
-the runtime selected AVX2 with four workers, loaded the authenticated model, encoded and generated
-from an arbitrary text prompt, and measured 23.960 tok/s over three 32-token iterations. That
-shared-cloud figure is disclosed for portability only and is not compared with the dedicated
-i5-7500 result. Raw evidence is in `results/linux-smoke.json`.
+Commit `b8b1cb9d9c1b2394a6c1878aa587c1454113aee0` was cloned from the public repository and
+built natively on the Google Cloud VM with Rust 1.97.0. All 11 release tests passed. Both runtime
+hashes above were taken from that native build.
 
-## Standard benchmark
+The inference-only binary authenticated the V4 model, selected AVX2 with four workers, encoded an
+arbitrary text prompt natively, and generated text. A 15-iteration end-to-end-style benchmark on
+that VM measured:
 
-The selected artifact was expanded into a temporary Hugging Face checkpoint without changing any
-quantized value and evaluated with the unmodified EleutherAI harness. Conditions: full validation
-sets, 0-shot, CPU, batch size 64, no sample limit, harness 0.4.12.
+| Linux smoke stage | Result |
+|---|---:|
+| Cold model load | 55.973 ms |
+| Tokenization | 0.006 ms |
+| Prompt prefill | 33.053 ms |
+| Time to first token | 89.031 ms |
+| Decode | 180.178 tok/s |
 
-| Task | Examples | Accuracy | Normalized accuracy |
+This is a portability result on disclosed hardware, not a comparison against the other entry.
+Raw evidence: `results/linux-sable-q3-smoke.json`.
+
+## Full standard benchmark
+
+The selected PKLM was expanded without changing any quantized value and evaluated alongside the
+uncompressed source checkpoint with the same unmodified EleutherAI harness. Conditions: full
+validation sets, 0-shot, batch size 64, no sample limit, CPU only, identical task versions.
+
+| Task | N | Q3 accuracy | Q3 normalized | FP32 normalized | Q3 delta |
+|---|---:|---:|---:|---:|---:|
+| PIQA | 1,838 | 55.2775% ± 1.1601% | 55.9304% ± 1.1583% | 57.8890% | -1.9587 pt |
+| HellaSwag | 10,042 | 26.4091% ± 0.4399% | 27.2456% ± 0.4443% | 28.0621% | -0.8166 pt |
+| ARC-Easy | 2,376 | 33.4596% ± 0.9682% | 32.8283% ± 0.9636% | 38.9731% | -6.1448 pt |
+| ARC-Challenge | 1,172 | 19.1126% ± 1.1490% | 23.2935% ± 1.2353% | 23.7201% | -0.4266 pt |
+
+Q3 normalized retention versus the matched FP32 checkpoint is 96.62% PIQA, 97.09% HellaSwag,
+84.23% ARC-Easy, and 98.20% ARC-Challenge. ARC-Easy is the clear compression weakness; it is not
+hidden or averaged away.
+
+The Q3 run processed all 58,032 likelihood requests in 319.564 seconds. Raw harness files:
+`results/lm-eval-sable-q3/results.json` (SHA-256
+`1cdbdb6886b0467a266ad2e5931ce10ae73b94c233903a4a77166b6afc9797aa`) and
+`results/lm-eval-sable-fp32/results.json` (SHA-256
+`883ea62248eb5c4e3e5b326ed786f06d406bda1dc8244adaba859f5c58c638e6`).
+
+## V1.0 to v1.1
+
+The comparison uses the previously published v1.0 files and the current v1.1 files.
+
+| Measurement | v1.0 | v1.1 | Change |
 |---|---:|---:|---:|
-| PIQA | 1,838 | 54.9510% ± 1.1608% | 53.3732% ± 1.1639% |
-| HellaSwag | 10,042 | 26.4887% ± 0.4404% | 27.2356% ± 0.4443% |
-| ARC-Easy | 2,376 | 26.6835% ± 0.9076% | 27.9040% ± 0.9204% |
-| ARC-Challenge | 1,172 | 19.9659% ± 1.1682% | 23.9761% ± 1.2476% |
+| Source parameters | 49,430,016 | 31,171,072 | smaller base |
+| Windows inference pair | 14.7776 MiB | 12.3201 MiB | -16.63% |
+| Windows AVX2, four workers | 67.622 tok/s | 111.460 tok/s | +64.83% |
+| Peak sampled working set | 20.707 MiB | 18.102 MiB | -12.58% |
+| PIQA normalized | 53.3732% | 55.9304% | +2.5572 pt |
+| HellaSwag normalized | 27.2356% | 27.2456% | +0.0100 pt |
+| ARC-Easy normalized | 27.9040% | 32.8283% | +4.9243 pt |
+| ARC-Challenge normalized | 23.9761% | 23.2935% | -0.6826 pt |
 
-The scores are reported regardless of whether they improve over the earlier candidate. Hardware
-was used only to shorten evaluation time. Full harness JSON is under `results/lm-eval-balanced/`;
-its SHA-256 is `9c59d510f7d5f2250067fa6847170a27d81bb85f1b8d9b0030db3529c35ff303`.
-The run processed 58,032 likelihood requests in 596.105 seconds.
+This is a broad engineering improvement, not a quality sweep: ARC-Challenge regressed slightly,
+and the smaller base remains a weak open-ended generator.
 
 ## Retrieval benchmark
 
-The strengthened public generator covers 12 task types: direct, close lookalike, latest-wins,
-two-hop, absent identifier, Unicode identifier, long value, malformed record, missing pointer,
-punctuation, case-sensitive collision, and adversarial abstention. The index stores identifiers and
-archive byte ranges, never answers; answers are read from the archive at query time.
-
-On the new adversarial 1M-whitespace-token tier:
+The seeded 1M-whitespace-token tier covers 12 task types: direct lookup, close lookalike,
+latest-wins duplicates, two-hop references, absent identifiers, Unicode identifiers, long
+values, malformed records, missing pointers, punctuation, case-sensitive collisions, and
+adversarial abstention. The index stores identifiers and archive byte ranges, never answers.
 
 | Check | Result |
 |---|---:|
@@ -189,23 +214,19 @@ On the new adversarial 1M-whitespace-token tier:
 | Correct | 560/560 (100.00%) |
 | Task types perfect | 12/12 |
 | Index bytes / entries | 42,741 / 1,740 |
-| Index build | 90.596 ms, 71.446 MiB/s |
-| Loaded-index query mean / p50 / p95 | 5.031 / 4 / 11 us |
-| Reopen-per-query mean / p50 / p95 | 44.543 / 23 / 39 us |
-| Four-thread throughput | 151,828.997 queries/s, 2,800/2,800 correct |
+| Index build | 32.701 ms, 197.939 MiB/s |
+| Loaded-index query mean / p50 / p95 | 4.723 / 4 / 10 us |
+| Reopen-per-query mean / p50 / p95 | 29.355 / 28 / 38 us |
+| Four-thread throughput | 262,910.798 queries/s, 2,800/2,800 correct |
 
-“Reopen” means the archive was reopened for every query; the OS page cache was not cleared. This
-is explicitly not presented as cold-storage latency. The legacy 100M-token scale test remains
-available separately: 678,129,025 archive bytes, 1,000/1,000 correct across the original five task
-types, an 89,509-byte index, 9.699 us mean, 6 us p50, and 19 us p95.
-
-Evidence is in `results/retrieval-adversarial-1m-index.json`,
-`results/retrieval-adversarial-1m.json`, and `results/retrieval-100m.json`.
+“Reopen” means the archive was reopened for every query; the OS page cache was not cleared. It is
+not cold-storage latency. Raw evidence is included inside
+`results/challenge-sable-q3.json` and under `results/challenge-retrieval/`.
 
 ## What remains before declaring a winner
 
-1. Obtain the other 50M entry, its exact commit, artifacts, and commands.
-2. Run both entries on the same idle hardware with the same prompt IDs, context, task versions,
-   thread count, and timing boundary.
-3. Compare size, packed decode, end-to-end text latency, retrieval accuracy/speed, and standard
-   accuracy as separate columns rather than collapsing them into one vague claim.
+1. Obtain the other entry, exact public commit, artifacts, and commands.
+2. Run both on the same idle hardware with the same prompt text/IDs, context, task versions,
+   thread count, warmup, and timing boundary.
+3. Compare deployment size, packed decode, end-to-end text latency, standard accuracy, retrieval
+   accuracy, and retrieval speed as separate columns.

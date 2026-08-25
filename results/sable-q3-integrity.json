@@ -1,0 +1,19 @@
+{
+  "valid": true,
+  "artifact": "artifacts\\pickle-31m-sable-q3.pklm",
+  "sha256": "b27d636d5b8b725cbd6188d1cfeb9a71da6c73e03454f6ca6d8b233c73952fef",
+  "artifact_bytes": 13892464,
+  "artifact_mib": 13.248886108398438,
+  "parameters": 31171072,
+  "tensor_count": 74,
+  "embedded_file_count": 4,
+  "effective_artifact_bits_per_parameter": 3.565476092705442,
+  "manifest_quality": {
+    "global_cosine": 0.9866457324668244,
+    "global_nrmse": 0.16288093382896895
+  },
+  "measured_quality": {
+    "global_nrmse": 0.16288093382711855,
+    "global_cosine": 0.9866457324668244
+  }
+}

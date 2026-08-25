@@ -1,7 +1,7 @@
 {
   "format": "pickle-native-validation-v1",
-  "runtime": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\bin\\pickle50.exe",
-  "native_model": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\artifacts\\pickle-31m-sable-q3.pkn",
+  "runtime": "target\\release\\pickle50.exe",
+  "native_model": "artifacts\\pickle-31m-sable-q3.pkn",
   "reference": "D:\\CodexCache\\pickle-50m\\sable-q3-eval",
   "prompt_token_ids": [
     2,

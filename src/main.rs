@@ -74,8 +74,9 @@ fn usage() -> ! {
            pickle50 model-generate --model FILE (--prompt TEXT | --prompt-file FILE | --tokens ID,ID,...) [--new-tokens N] [--threads N] [--kernel auto|scalar|avx2]\n\
            pickle50 model-bench --model FILE (--prompt TEXT | --prompt-file FILE | --tokens ID,ID,...) [--new-tokens N] [--iterations N] [--threads N] [--kernel auto|scalar|avx2] [--json FILE]\n\n\
            pickle50 model-e2e --model FILE (--prompt TEXT | --prompt-file FILE | --tokens ID,ID,...) [--new-tokens N] [--iterations N] [--threads N] [--kernel auto|scalar|avx2] [--json FILE]\n\n\
-         Text prompts are encoded by the TokenMonster implementation inside the runtime.\n\
-         Prompt inference adds BOS by default; pass token IDs for exact low-level control.\n\
+         Text prompts are encoded by the tokenizer embedded in each native model.\n\
+         Each model stores its default BOS behavior; use --add-bos to override it.\n\
+         Pass token IDs for exact low-level control.\n\
          Token counts are whitespace-token counts. Generated banks are deterministic for a fixed seed."
     );
     std::process::exit(2)

@@ -1,1 +1,15 @@
-{"format":"pickle-inference-benchmark-v1","model_bytes":15128816,"runtime_bytes":366592,"kernel":"avx2","worker_threads":4,"prompt_tokens":9,"generated_tokens_per_iteration":64,"iterations":3,"cold_load_seconds":0.096733,"tokenization_seconds":0.000006,"prefill_seconds":0.259515,"time_to_first_token_seconds":0.356254,"decode_seconds":4.367731,"decode_tokens_per_second":43.958747,"generated_token_ids":[1046,28,17,1116,3707,1955,15,1396,3,319,82,98,1303,893,15,1396,3,319,82,98,1303,893,15,2943,3,319,82,98,1303,893,15,1421,3,906,660,3,913,845,79,2878,17,1116,3,319,82,98,1303,893,15,1396,3,319,82,98,1303,893,15,2943,3,319,82,98,1303,893]}
+{
+  "format": "pickle-native-decode-result-v2",
+  "model": "C:\\Users\\Thinkpad\\Documents\\Codex\\2026-08-24\\so-yesterday-i-was-drunk-and\\pickle-50m\\artifacts\\pickle-31m-sable-q3.pkn",
+  "model_bytes": 12534009,
+  "kernel": "avx2",
+  "worker_threads": 4,
+  "prompt_tokens": 9,
+  "timed_decode_tokens_per_iteration": 64,
+  "iterations": 3,
+  "total_elapsed_seconds": 2.031825,
+  "tokens_per_second": 94.496313,
+  "iteration_tokens_per_second": [94.548384, 94.849256, 94.094359],
+  "allocated_model_and_state_bytes": 13844765,
+  "generated_token_ids_last_iteration": [37, 4661, 567, 8190, 16, 37, 4661, 567, 8190, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661, 567, 16, 37, 4661]
+}
